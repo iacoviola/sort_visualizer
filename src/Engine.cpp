@@ -140,8 +140,8 @@ bool Visualizer::Engine::init(){
     mTexture = new LTexture(mRenderer, font);
     // Load the text (starting with bubble sort by default)
     mTexture->loadFromRenderedText("BUBBLE SORT", {0xFF, 0xFF, 0xFF, 0xFF});
-    // Close the font
-    SDL_SetRenderDrawColor(mRenderer, 0x00, 0x00, 0x00, 0xFF);
+    // Set background color
+    SDL_SetRenderDrawColor(mRenderer, 0x4a, 0x18, 0xa8, 0xFF);
     return true;
 }
 
@@ -446,7 +446,7 @@ void Visualizer::Engine::draw(){
     SDL_RenderClear(mRenderer);
 
     // Render the sort name
-    mTexture->render(0, 0);
+    mTexture->render(20, 20);
 
     // Render the array
     draw_rects();
@@ -459,11 +459,24 @@ void Visualizer::Engine::draw_rects(){
     // Each element in the array is a rectangle
     SDL_Rect rect;
 
-    // Set the color of the rectangles to white
-    SDL_SetRenderDrawColor(mRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+    // Set the starting color and ending color
+    int startColorR = 0xf3;
+    int startColorG = 0xee;
+    int startColorB = 0xfc;
+
+    int endColorR = 0x69;
+    int endColorG = 0x2b;
+    int endColorB = 0xe0;
+
+    // Calculate the color step
+    double colorStepR = (endColorR - startColorR) / (double) mMAX_NUMBER;
+    double colorStepG = (endColorG - startColorG) / (double) mMAX_NUMBER;
+    double colorStepB = (endColorB - startColorB) / (double) mMAX_NUMBER;
 
     // Draw the rectangles
     for(int i = 0; i < mArray.size(); i++){
+        // Set the color of each rectangle
+        SDL_SetRenderDrawColor(mRenderer, startColorR + colorStepR * i, startColorG + colorStepG * i, startColorB + colorStepB * i, 0xFF);
         // Set the width of the rectangle to the width of the window divided by the number of elements in the array
         rect.w = mSize.x / mMAX_NUMBER;
         // Set the height of the rectangle
@@ -477,8 +490,8 @@ void Visualizer::Engine::draw_rects(){
         SDL_RenderFillRect(mRenderer, &rect);
     }
 
-    // Set the color back to black for the next draw
-    SDL_SetRenderDrawColor(mRenderer, 0x00, 0x00, 0x00, 0xFF);
+    // Set background color
+    SDL_SetRenderDrawColor(mRenderer, 0x4a, 0x18, 0xa8, 0xFF);
 }
 
 void Visualizer::Engine::fill_array(){
