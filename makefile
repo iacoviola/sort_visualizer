@@ -1,7 +1,7 @@
 SRC_PATH = src/
 BUILD_PATH = build/
 #OBJS specifies which files to compile as part of the project
-OBJS = $(SRC_PATH)main.cpp $(SRC_PATH)Engine.cpp
+OBJS = $(SRC_PATH)main.cpp $(SRC_PATH)Engine.cpp $(SRC_PATH)LTexture.cpp
 
 #CC specifies which compiler we're using
 CC = g++
@@ -11,7 +11,7 @@ CC = g++
 COMPILER_FLAGS = -O -w -std=c++17
 
 #LINKER_FLAGS specifies the libraries we're linking against
-LINKER_FLAGS = -lSDL2 -lSDL2_image
+LINKER_FLAGS = -lSDL2 -lSDL2_image -lSDL2_ttf
 
 #INCLUDE_PATHS specifies the additional include paths we'll need (only on Mac) empty at the moment
 INCLUDE_PATHS =

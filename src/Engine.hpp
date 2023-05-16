@@ -12,41 +12,127 @@
 #include <string>
 #include <SDL2/SDL.h>
 
-#include "couple.hpp"
+#include "Utilities.hpp"
+#include "LTexture.hpp"
 
 namespace Visualizer {
     class Engine{
         public:
-            Engine(Couple size, const int max_elements);
-            Engine(Couple size, const int max_elements, const char* window_title);
-            Engine(Couple size, const int max_elements, const char* window_title, int update_frequency);
+            /*!
+            * @brief Engine constructor
+            * @param size The size of the window
+            * @param max_elements The maximum number of elements in the array
+            */
+            Engine(COUPLE size, const int max_elements);
+
+            /*!
+            * @brief Engine constructor
+            * @param size The size of the window
+            * @param max_elements The maximum number of elements in the array
+            * @param window_title The title of the window
+            */
+            Engine(COUPLE size, const int max_elements, const char* window_title);
+
+            /*!
+            * @brief Engine constructor
+            * @param size The size of the window
+            * @param max_elements The maximum number of elements in the array
+            * @param window_title The title of the window
+            * @param update_frequency The frequency with which the window is updated when sorting
+            */
+            Engine(COUPLE size, const int max_elements, const char* window_title, int update_frequency);
+
+            /*!
+            * @brief Engine destructor
+            */
             ~Engine();
             
+            /*!
+            * @brief Starts the engine
+            */
             void run();
 
         private:
-            const Couple mSize;
-            const int mMAX_NUMBER;
+            const COUPLE mSize; /*! The size of the window */
+            const int mMAX_NUMBER; /*! The maximum number of elements in the array */
 
-            bool mIsRunning = true;
-            bool mRequestSort = false;
-            bool mRequestShuffle = false;
-            bool mIsSorted = false;
-            std::string mWindowTitle = "SDL Sort Visualizer";
-            int mUpdateFrequency = 10;
-            int mResumeIndex = 0;
+            bool mIsRunning = true; /*! Whether the engine is running or not (esc or closing the app make this false)*/
+            bool mRequestSort = false; /*! Whether the user requested a sort or not (spacebar was pressed)*/
+            bool mRequestShuffle = false; /*! Whether the user requested a shuffle or not (s was pressed)*/
+            bool mIsSorted = false; /*! Whether the array is sorted or not (end of sort)*/
+            bool mIsSortStopped = false; /*! Whether the sort is stopped or not (spacebar was pressed while sorting)*/
+            bool mIsFastForward = false; /*! Whether the sort is fast forwarded or not (f was pressed while sorting)*/
 
-            SDL_Renderer* mRenderer = NULL;
-            SDL_Window* mWindow = NULL;
+            std::string mWindowTitle = "SDL Sort Visualizer"; /*! The title of the window */
+            int mUpdateFrequency = 10; /*! The frequency with which the window is updated when sorting */
+            int mResumeIndex = 0; /*! The index from which the sort should resume (used when the sort is stopped, only used for bubble sort for now) */
+            SORT_IDENTIFIER mCurrentSort = BUBBLE_SORT; /*! The currently selected sort algorithm */
 
-            std::vector<int> mArray;
+            SDL_Renderer* mRenderer = NULL; /*! The main renderer */
+            SDL_Window* mWindow = NULL; /*! The main window */
 
+            LTexture* mTexture; /*! The texture used to draw the text */
+
+            std::vector<int> mArray; /*! The array to be sorted */
+
+            /*!
+            * @brief Initializes the engine
+            * @return true if the engine was initialized successfully, false otherwise
+            */
             bool init();
+            
+            /*!
+            * @brief Handles user input
+            */
             void handleEvents();
+            
+            /*!
+            * @brief Sorts the array using the currently selected algorithm
+            */
+            void sort();
+
+            /*!
+            * @brief Sorts the array using cocktail sort
+            */
+            void cocktailSort();
+            
+            /*!
+            * @brief Sorts the array using quick sort
+            * @param low The lower bound of the array
+            * @param high The upper bound of the array
+            */
+            void quickSort(int low, int high);
+
+            /*!
+            * @brief Utility function used by quick sort
+            * @param low The lower bound of the array
+            * @param high The upper bound of the array
+            */
+            int partition(int low, int high);
+            
+            /*!
+            * @brief Sorts the array using bubble sort
+            */
             void bubbleSort();
-            void draw();
+            
+            /*!
+            * @brief Shuffles the array using the Fisher-Yates algorithm
+            */
             void shuffle();
+            
+            /*!
+            * @brief Draws the elements to the screen
+            */
+            void draw();
+
+            /*!
+            * @brief Draws the array elements to the screen as rectangles
+            */
             void draw_rects();
+            
+            /*!
+            * @brief Fills the array with numbers from 1 to mMAX_NUMBER
+            */
             void fill_array();
     };
 }
