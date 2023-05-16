@@ -432,8 +432,12 @@ void Visualizer::Engine::shuffle(){
 
     //! Draw the array one last time (I MIGHT NEED TO ADD THIS TO THE SORTING ALGORITHMS AS WELL)
     draw();
+    // The array is shuffled and not sorted
+    mIsSorted = false;
     // Set the shuffle flag to false
     mRequestShuffle = false;
+    // (Only for bubble sort for now), the resume index is reset
+    mResumeIndex = 0;
 }
 
 void Visualizer::Engine::draw(){
