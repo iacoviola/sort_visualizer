@@ -21,7 +21,9 @@ struct COUPLE {
 enum SORT_IDENTIFIER {
     BUBBLE_SORT,
     QUICK_SORT,
-    COCKTAIL_SORT
+    COCKTAIL_SORT,
+    SHELL_SORT,
+    HEAP_SORT
 };
 
 #endif /* couple_hpp */

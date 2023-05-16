@@ -191,6 +191,26 @@ void Visualizer::Engine::handleEvents(){
                         mTexture->loadFromRenderedText("COCKTAIL SORT", {0xFF, 0xFF, 0xFF, 0xFF});
                     }
                     break;
+                // User presses the E key
+                case SDLK_e:
+                    // If the array is not sorted or stopped midexecution and if the current sort is not already shell sort
+                    if(!mIsSorted && !mIsSortStopped && mCurrentSort != SHELL_SORT){
+                        // Set the current sort to shell sort
+                        mCurrentSort = SHELL_SORT;
+                        // Load the text for shell sort
+                        mTexture->loadFromRenderedText("SHELL SORT", {0xFF, 0xFF, 0xFF, 0xFF});
+                    }
+                    break;
+                // User presses the H key
+                case SDLK_h:
+                    // If the array is not sorted or stopped midexecution and if the current sort is not already heap sort
+                    if(!mIsSorted && !mIsSortStopped && mCurrentSort != HEAP_SORT){
+                        // Set the current sort to heap sort
+                        mCurrentSort = HEAP_SORT;
+                        // Load the text for heap sort
+                        mTexture->loadFromRenderedText("HEAP SORT", {0xFF, 0xFF, 0xFF, 0xFF});
+                    }
+                    break;
                 // User presses the SPACEBAR key
                 case SDLK_SPACE:
                     // If the array is not sorted
@@ -235,6 +255,16 @@ void Visualizer::Engine::sort(){
             // Shuffles the array because cocktail sort cannot be stopped and resumed (for now) so it must be restarted
             shuffle();
             cocktailSort();
+            break;
+        case SHELL_SORT:
+            // Shuffles the array because shell sort cannot be stopped and resumed (for now) so it must be restarted
+            shuffle();
+            shellSort();
+            break;
+        case HEAP_SORT:
+            // Shuffles the array because heap sort cannot be stopped and resumed (for now) so it must be restarted
+            shuffle();
+            heapSort();
             break;
     }
 
@@ -412,6 +442,143 @@ void Visualizer::Engine::bubbleSort(){
                     draw();
             }
         }
+    }
+
+    // Once the array is sorted set the sort stopped flag to false
+    mIsSortStopped = false;
+}
+
+void Visualizer::Engine::shellSort(){
+    // Start with a big gap, then reduce the gap
+    for (int gap = mArray.size() / 2; gap > 0; gap /= 2){
+        /*
+        * Do a gapped insertion sort for this gap size.
+        * The first gap elements a[0..gap-1] are already in gapped order
+        * keep adding one more element until the entire array is
+        * gap sorted 
+        */
+        for (int i = gap; i < mArray.size(); i += 1){
+            // Handle events everytime the inner loop repeats
+            handleEvents();
+            if(!mIsRunning || !mRequestSort){
+                mIsSortStopped = true;
+                mResumeIndex = i;
+                return;
+            }
+            /*
+            * Add a[i] to the elements that have been gap sorted
+            * save a[i] in temp and make a hole at position i
+            */
+            int temp = mArray[i];
+  
+            /*
+            * shift earlier gap-sorted elements up until the correct 
+            * location for a[i] is found
+            */
+            int j;            
+            for (j = i; j >= gap && mArray[j - gap] > temp; j -= gap){
+                mArray[j] = mArray[j - gap];
+                /*
+                * If the current index is a multiple of the update frequency, draw the array on the screen
+                * if fast forward is enabled, draw the array on the screen immediately
+                */
+                if(j % mUpdateFrequency == 0 && !mIsFastForward)
+                    draw();
+            }
+
+            //  put temp (the original a[i]) in its correct location
+            mArray[j] = temp;
+            /*
+            * If the current index is a multiple of the update frequency, draw the array on the screen
+            * if fast forward is enabled, draw the array on the screen immediately
+            */
+            if(j % mUpdateFrequency == 0 && !mIsFastForward)
+                draw();
+        }
+    }
+
+    // Once the array is sorted set the sort stopped flag to false
+    mIsSortStopped = false;
+}
+
+void Visualizer::Engine::heapify(int n, int i){
+    // Initialize largest as root
+    int largest = i;
+ 
+    // left = 2*i + 1
+    int l = 2 * i + 1;
+ 
+    // right = 2*i + 2
+    int r = 2 * i + 2;
+ 
+    // If left child is larger than root
+    if (l < n && mArray[l] > mArray[largest])
+        largest = l;
+ 
+    /*
+    * If right child is larger than largest
+    * so far
+    */
+    if (r < n && mArray[r] > mArray[largest])
+        largest = r;
+ 
+    // If largest is not root
+    if (largest != i) {
+        // Handle events everytime the inner loop repeats
+        handleEvents();
+        if(!mIsRunning || !mRequestSort){
+            mIsSortStopped = true;
+            mResumeIndex = i;
+            return;
+        }
+
+        std::swap(mArray[i], mArray[largest]);
+        
+        /*
+        * If the current index is a multiple of the update frequency, draw the array on the screen
+        * if fast forward is enabled, draw the array on the screen immediately
+        */
+        if(i % mUpdateFrequency == 0 && !mIsFastForward){
+            draw();
+        }
+ 
+        /*
+        * Recursively heapify the affected
+        * sub-tree
+        */
+        heapify(n, largest);
+    }
+}
+
+void Visualizer::Engine::heapSort(){
+    // Build heap (rearrange array)
+    for (int i = mArray.size() / 2 - 1; i >= 0; i--)
+        heapify(mArray.size(), i);
+ 
+    /*
+    * One by one extract an element
+    * from heap
+    */
+    for (int i = mArray.size() - 1; i > 0; i--) {
+        // Handle events everytime the inner loop repeats
+        handleEvents();
+        if(!mIsRunning || !mRequestSort){
+            mIsSortStopped = true;
+            mResumeIndex = i;
+            return;
+        }
+ 
+        // Move current root to end
+        std::swap(mArray[0], mArray[i]);
+        /*
+        * If the current index is a multiple of the update frequency, draw the array on the screen
+        * if fast forward is enabled, draw the array on the screen immediately
+        */
+        if(i % mUpdateFrequency == 0 && !mIsFastForward)
+            draw();
+ 
+        // call max heapify on the reduced heap
+        heapify(i, 0);
     }
 
     // Once the array is sorted set the sort stopped flag to false

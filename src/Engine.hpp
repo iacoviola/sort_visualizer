@@ -114,6 +114,23 @@ namespace Visualizer {
             * @brief Sorts the array using bubble sort
             */
             void bubbleSort();
+
+            /*!
+            * @brief Sorts the array using shell sort
+            */
+            void shellSort();
+
+            /*!
+            * @brief Utility function used by heap sort
+            * @param n The size of the heap
+            * @param i The index of the array root
+            */
+            void heapify(int n, int i);
+
+            /*!
+            * @brief Sorts the array using heap sort
+            */
+            void heapSort();
             
             /*!
             * @brief Shuffles the array using the Fisher-Yates algorithm
