@@ -633,7 +633,7 @@ void Visualizer::Engine::draw_rects(){
     // Draw the rectangles
     for(int i = 0; i < mMAX_NUMBER; i++){
         // Set the color of each rectangle
-        SDL_SetRenderDrawColor(mRenderer, startColorR + colorStepR * i, startColorG + colorStepG * i, startColorB + colorStepB * i, 0xFF);
+        SDL_SetRenderDrawColor(mRenderer, startColorR + colorStepR * mArray[i], startColorG + colorStepG * mArray[i], startColorB + colorStepB * mArray[i], 0xFF);
         // Set the width of the rectangle to the width of the window divided by the number of elements in the array
         rect.w = (float) mUsableWidth / mMAX_NUMBER;
         // Set the height of the rectangle
