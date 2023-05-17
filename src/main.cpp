@@ -11,7 +11,7 @@
 
 #include "Engine.hpp"
 
-int main(int argc, const char * argv[]) {
+int main(int argc, char * argv[]) {
     try {
         Visualizer::Engine engine({800, 600}, 400, "SDL Sort Visualizer", 20);
         engine.run();

@@ -192,7 +192,7 @@ void Visualizer::Engine::handleEvents(){
                 // User presses the B key
                 case SDLK_b:
                     // If the array is not sorted and if the current sort is not already bubble sort
-                    if(!mIsSorted && mCurrentSort != BUBBLE_SORT){
+                    if(!mRequestSort && mCurrentSort != BUBBLE_SORT){
                         // Set the current sort to bubble sort
                         mCurrentSort = BUBBLE_SORT;
                         // Load the text for bubble sort
@@ -202,7 +202,7 @@ void Visualizer::Engine::handleEvents(){
                 // User presses the Q key
                 case SDLK_q:
                     // If the array is not sorted and if the current sort is not already quick sort
-                    if(!mIsSorted && mCurrentSort != QUICK_SORT){
+                    if(!mRequestSort && mCurrentSort != QUICK_SORT){
                         // Set the current sort to quick sort
                         mCurrentSort = QUICK_SORT;
                         // Load the text for quick sort
@@ -212,7 +212,7 @@ void Visualizer::Engine::handleEvents(){
                 // User presses the C key
                 case SDLK_c:
                     // If the array is not sorted and if the current sort is not already cocktail sort
-                    if(!mIsSorted && mCurrentSort != COCKTAIL_SORT){
+                    if(!mRequestSort && mCurrentSort != COCKTAIL_SORT){
                         // Set the current sort to cocktail sort
                         mCurrentSort = COCKTAIL_SORT;
                         // Load the text for cocktail sort
@@ -222,7 +222,7 @@ void Visualizer::Engine::handleEvents(){
                 // User presses the E key
                 case SDLK_e:
                     // If the array is not sorted and if the current sort is not already shell sort
-                    if(!mIsSorted && mCurrentSort != SHELL_SORT){
+                    if(!mRequestSort && mCurrentSort != SHELL_SORT){
                         // Set the current sort to shell sort
                         mCurrentSort = SHELL_SORT;
                         // Load the text for shell sort
@@ -232,7 +232,7 @@ void Visualizer::Engine::handleEvents(){
                 // User presses the H key
                 case SDLK_h:
                     // If the array is not sorted and if the current sort is not already heap sort
-                    if(!mIsSorted && mCurrentSort != HEAP_SORT){
+                    if(!mRequestSort && mCurrentSort != HEAP_SORT){
                         // Set the current sort to heap sort
                         mCurrentSort = HEAP_SORT;
                         // Load the text for heap sort
