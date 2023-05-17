@@ -10,44 +10,57 @@
 #include <cstdlib>
 #include <ctime>
 #include <stdexcept>
+#include <numeric>
 
 #include "Engine.hpp"
 
 Visualizer::Engine::Engine(COUPLE size, const int max_elements) 
-: mSize(size), mMAX_NUMBER(max_elements), mUsableWidth(size.x - (size.x / 4)) {
+: mSize(size), mMAX_NUMBER(max_elements), mUsableWidth(size.x - (size.x / 4)), mArray(max_elements) {
 
     // Initialize the engine
     if(!init()){
         throw std::runtime_error("Failed to initialize!");
     }
+
     // Fill the array with numbers from 1 to mMAX_NUMBER
-    fill_array();
+    std::iota(mArray.begin(), mArray.end(), 1);
+
+    // Fill the array with numbers from 1 to mMAX_NUMBER
+    //fill_array();
     // Shuffle the array
     shuffle();
 }
 
-Visualizer::Engine::Engine(COUPLE size, const int max_elements, const char* window_title) 
-: mSize(size), mMAX_NUMBER(max_elements), mWindowTitle(window_title), mUsableWidth(size.x - (size.x / 4)) {
+Visualizer::Engine::Engine(const COUPLE size, const int max_elements, const char* window_title) 
+: mSize(size), mMAX_NUMBER(max_elements), mWindowTitle(window_title), mUsableWidth(size.x - (size.x / 4)), mArray(max_elements) {
     
     // Initialize the engine
     if(!init()){
         throw std::runtime_error("Failed to initialize!");
     }
+    
     // Fill the array with numbers from 1 to mMAX_NUMBER
-    fill_array();
+    std::iota(mArray.begin(), mArray.end(), 1);
+
+    // Fill the array with numbers from 1 to mMAX_NUMBER
+    //fill_array();
     // Shuffle the array
     shuffle();
 }
 
 Visualizer::Engine::Engine(COUPLE size, const int max_elements, const char* window_title, int update_frequency) 
-: mSize(size), mMAX_NUMBER(max_elements), mWindowTitle(window_title), mUpdateFrequency(update_frequency), mUsableWidth(size.x - (size.x / 4)) {
+: mSize(size), mMAX_NUMBER(max_elements), mWindowTitle(window_title), mUpdateFrequency(update_frequency), mUsableWidth(size.x - (size.x / 4)), mArray(max_elements) {
     
     // Initialize the engine
     if(!init()){
         throw std::runtime_error("Failed to initialize!");
     }
+    
     // Fill the array with numbers from 1 to mMAX_NUMBER
-    fill_array();
+    std::iota(mArray.begin(), mArray.end(), 1);
+
+    // Fill the array with numbers from 1 to mMAX_NUMBER
+    //fill_array();
     // Shuffle the array
     shuffle();
 }
@@ -636,11 +649,4 @@ void Visualizer::Engine::draw_rects(){
 
     // Set background color
     SDL_SetRenderDrawColor(mRenderer, 0x4a, 0x18, 0xa8, 0xFF);
-}
-
-void Visualizer::Engine::fill_array(){
-    // Fill the array with numbers from 1 to mMAX_NUMBER
-    for(int i = 1; i <= mMAX_NUMBER; i++){
-        mArray.push_back(i);
-    }
 }

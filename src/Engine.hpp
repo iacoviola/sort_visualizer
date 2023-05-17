@@ -152,11 +152,6 @@ namespace Visualizer {
             * @brief Draws the array elements to the screen as rectangles
             */
             void draw_rects();
-            
-            /*!
-            * @brief Fills the array with numbers from 1 to mMAX_NUMBER
-            */
-            void fill_array();
     };
 }
 
