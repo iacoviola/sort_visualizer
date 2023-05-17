@@ -66,12 +66,19 @@ bool LTexture::loadFromFile(std::string path){
     return true;
 }
 
-bool LTexture::loadFromRenderedText(std::string textureText, SDL_Color textColor){
+bool LTexture::loadFromRenderedText(std::string textureText, SDL_Color textColor, bool wrappable){
     //Remove preexisting texture
     free();
 
+    SDL_Surface* textSurface = NULL;
+
     //Render text surface
-    SDL_Surface* textSurface = TTF_RenderText_LCD(font, textureText.c_str(), textColor, {0x69, 0x2b, 0xe0, 0xFF});
+    if(wrappable){
+        textSurface = TTF_RenderText_LCD_Wrapped(font, textureText.c_str(), textColor, {0x69, 0x2b, 0xe0, 0xFF}, 0);
+    } else {
+        textSurface = TTF_RenderText_LCD(font, textureText.c_str(), textColor, {0x69, 0x2b, 0xe0, 0xFF});
+    }
+
     if(textSurface == NULL){
         printf("Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError());
         return false;

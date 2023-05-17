@@ -5,15 +5,18 @@
 //  Created by Emiliano Iacopini on 5/16/23.
 //
 
-#ifndef couple_hpp
-#define couple_hpp
+#ifndef Utilities_hpp
+#define Utilities_hpp
+
+#include <string>
+
 /*!
 * @brief A struct that represents a couple of integers used to represent the size of the window
 */
-struct COUPLE {
+typedef struct COUPLE {
     int x;
     int y;
-};
+} COUPLE;
 
 /*!
 * @brief Enum that represents the sorting algorithms available
@@ -26,4 +29,16 @@ enum SORT_IDENTIFIER {
     HEAP_SORT
 };
 
-#endif /* couple_hpp */
+// Strings used to represent the sorting algorithms
+const std::string gSORT_NAMES[] = {
+    "Bubble Sort",
+    "Quick Sort",
+    "Cocktail Sort",
+    "Shell Sort",
+    "Heap Sort"
+};
+
+// String used for the info text
+const std::string gINFO_TEXT = " B - bubble sort \n E - shell sort \n Q - quick sort \n H - heap sort \n C - cocktail sort \n ------- \n Spacebar - start/ff \n S - shuffle ";
+
+#endif /* Utilities_hpp */

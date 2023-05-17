@@ -53,17 +53,17 @@ namespace Visualizer {
             void run();
 
         private:
-            const COUPLE mSize; /*! The size of the window */
+            COUPLE mSize; /*! The size of the window */
             const int mMAX_NUMBER; /*! The maximum number of elements in the array */
 
             bool mIsRunning = true; /*! Whether the engine is running or not (esc or closing the app make this false)*/
             bool mRequestSort = false; /*! Whether the user requested a sort or not (spacebar was pressed)*/
             bool mRequestShuffle = false; /*! Whether the user requested a shuffle or not (s was pressed)*/
             bool mIsSorted = false; /*! Whether the array is sorted or not (end of sort)*/
-            bool mIsSortStopped = false; /*! Whether the sort is stopped or not (spacebar was pressed while sorting)*/
             bool mIsFastForward = false; /*! Whether the sort is fast forwarded or not (f was pressed while sorting)*/
 
             std::string mWindowTitle = "SDL Sort Visualizer"; /*! The title of the window */
+            int mSwapCount = 0; /*! The number of swaps performed during the sort */
             int mUpdateFrequency = 10; /*! The frequency with which the window is updated when sorting */
             int mResumeIndex = 0; /*! The index from which the sort should resume (used when the sort is stopped, only used for bubble sort for now) */
             SORT_IDENTIFIER mCurrentSort = BUBBLE_SORT; /*! The currently selected sort algorithm */
@@ -72,6 +72,12 @@ namespace Visualizer {
             SDL_Window* mWindow = NULL; /*! The main window */
 
             LTexture* mTexture; /*! The texture used to draw the text */
+            LTexture* mInfoTexture; /*! The texture used to draw the info text */
+
+            TTF_Font* mFontSmall; /*! The font used to draw the text */
+            TTF_Font* mFontLarge; /*! The font used to draw the text */
+
+            int mUsableWidth; /*! The usable width of the window */
 
             std::vector<int> mArray; /*! The array to be sorted */
 

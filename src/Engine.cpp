@@ -6,16 +6,15 @@
 //
 
 #include <SDL2/SDL.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
+#include <cstdio>
+#include <cstdlib>
+#include <ctime>
 #include <stdexcept>
 
 #include "Engine.hpp"
-#include "Utilities.hpp"
 
 Visualizer::Engine::Engine(COUPLE size, const int max_elements) 
-: mSize(size), mMAX_NUMBER(max_elements) {
+: mSize(size), mMAX_NUMBER(max_elements), mUsableWidth(size.x - (size.x / 4)) {
 
     // Initialize the engine
     if(!init()){
@@ -28,7 +27,7 @@ Visualizer::Engine::Engine(COUPLE size, const int max_elements)
 }
 
 Visualizer::Engine::Engine(COUPLE size, const int max_elements, const char* window_title) 
-: mSize(size), mMAX_NUMBER(max_elements), mWindowTitle(window_title) {
+: mSize(size), mMAX_NUMBER(max_elements), mWindowTitle(window_title), mUsableWidth(size.x - (size.x / 4)) {
     
     // Initialize the engine
     if(!init()){
@@ -41,7 +40,7 @@ Visualizer::Engine::Engine(COUPLE size, const int max_elements, const char* wind
 }
 
 Visualizer::Engine::Engine(COUPLE size, const int max_elements, const char* window_title, int update_frequency) 
-: mSize(size), mMAX_NUMBER(max_elements), mWindowTitle(window_title), mUpdateFrequency(update_frequency) {
+: mSize(size), mMAX_NUMBER(max_elements), mWindowTitle(window_title), mUpdateFrequency(update_frequency), mUsableWidth(size.x - (size.x / 4)) {
     
     // Initialize the engine
     if(!init()){
@@ -56,7 +55,13 @@ Visualizer::Engine::Engine(COUPLE size, const int max_elements, const char* wind
 Visualizer::Engine::~Engine(){
     // Deallocate memory destroying the elements used by the texture
     mTexture->free();
-    
+    // Deallocate memory destroying the elements used by the info texture
+    mInfoTexture->free();
+
+    // Close the fonts
+    TTF_CloseFont(mFontSmall);
+    TTF_CloseFont(mFontLarge);
+
     // Destroy the renderer and the window
     SDL_DestroyRenderer(mRenderer);
     SDL_DestroyWindow(mWindow);
@@ -85,7 +90,7 @@ void Visualizer::Engine::run(){
         if(mRequestShuffle){
             shuffle();
         }
-        
+
         // Clear the screen
         draw();
     }
@@ -104,7 +109,7 @@ bool Visualizer::Engine::init(){
     }
 
     // Create the window
-    mWindow = SDL_CreateWindow(mWindowTitle.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, mSize.x, mSize.y, SDL_WINDOW_SHOWN);
+    mWindow = SDL_CreateWindow(mWindowTitle.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, mSize.x, mSize.y, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 
     // Check if the window was created
     if(mWindow == NULL){
@@ -128,18 +133,31 @@ bool Visualizer::Engine::init(){
     }
 
     // Open the font used for the text
-    TTF_Font* font = TTF_OpenFont("../res/Roboto-Regular.ttf", 28);
+    mFontSmall = TTF_OpenFont("../res/Roboto-Regular.ttf", 17);
 
     // Check if the font was opened
-    if(font == NULL){
-        printf("Failed to load lazy font! SDL_ttf Error: %s\n", TTF_GetError());
+    if(mFontSmall == NULL){
+        printf("Failed to load small font! SDL_ttf Error: %s\n", TTF_GetError());
+        return false;
+    }
+
+    // Open the font used for the title text
+    mFontLarge = TTF_OpenFont("../res/Roboto-Regular.ttf", 24);
+
+    // Check if the font was opened
+    if(mFontLarge == NULL){
+        printf("Failed to load small font! SDL_ttf Error: %s\n", TTF_GetError());
         return false;
     }
 
     // Create the texture used for the text
-    mTexture = new LTexture(mRenderer, font);
+    mTexture = new LTexture(mRenderer, mFontLarge);
     // Load the text (starting with bubble sort by default)
-    mTexture->loadFromRenderedText("BUBBLE SORT", {0xFF, 0xFF, 0xFF, 0xFF});
+    mTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], {0xFF, 0xFF, 0xFF, 0xFF});
+    // Create the texture used for the info text
+    mInfoTexture = new LTexture(mRenderer, mFontSmall);
+    // Load the info text
+    mInfoTexture->loadFromRenderedText(gINFO_TEXT, {0xFF, 0xFF, 0xFF, 0xFF}, true);
     // Set background color
     SDL_SetRenderDrawColor(mRenderer, 0x4a, 0x18, 0xa8, 0xFF);
     return true;
@@ -154,6 +172,16 @@ void Visualizer::Engine::handleEvents(){
         if(e.type == SDL_QUIT){
             mIsRunning = false;
         }
+        else if (e.type == SDL_WINDOWEVENT){
+            // Window resized
+            if(e.window.event == SDL_WINDOWEVENT_RESIZED){
+                // Get the new window size
+                mSize.x = e.window.data1;
+                mSize.y = e.window.data2;
+                // Resize the window
+                SDL_SetWindowSize(mWindow, mSize.x, mSize.y);
+            }
+        }
         // User presses a key 
         else if (e.type == SDL_KEYDOWN){
             switch(e.key.keysym.sym){
@@ -163,74 +191,69 @@ void Visualizer::Engine::handleEvents(){
                     break;
                 // User presses the B key
                 case SDLK_b:
-                    // If the array is not sorted or stopped midexecution and if the current sort is not already bubble sort
-                    if(!mIsSorted && !mIsSortStopped && mCurrentSort != BUBBLE_SORT){
+                    // If the array is not sorted and if the current sort is not already bubble sort
+                    if(!mIsSorted && mCurrentSort != BUBBLE_SORT){
                         // Set the current sort to bubble sort
                         mCurrentSort = BUBBLE_SORT;
                         // Load the text for bubble sort
-                        mTexture->loadFromRenderedText("BUBBLE SORT", {0xFF, 0xFF, 0xFF, 0xFF});
+                        mTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], {0xFF, 0xFF, 0xFF, 0xFF});
                     }
                     break;
                 // User presses the Q key
                 case SDLK_q:
-                    // If the array is not sorted or stopped midexecution and if the current sort is not already quick sort
-                    if(!mIsSorted && !mIsSortStopped && mCurrentSort != QUICK_SORT){
+                    // If the array is not sorted and if the current sort is not already quick sort
+                    if(!mIsSorted && mCurrentSort != QUICK_SORT){
                         // Set the current sort to quick sort
                         mCurrentSort = QUICK_SORT;
                         // Load the text for quick sort
-                        mTexture->loadFromRenderedText("QUICK SORT", {0xFF, 0xFF, 0xFF, 0xFF});
+                        mTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], {0xFF, 0xFF, 0xFF, 0xFF});
                     }
                     break;
                 // User presses the C key
                 case SDLK_c:
-                    // If the array is not sorted or stopped midexecution and if the current sort is not already cocktail sort
-                    if(!mIsSorted && !mIsSortStopped && mCurrentSort != COCKTAIL_SORT){
+                    // If the array is not sorted and if the current sort is not already cocktail sort
+                    if(!mIsSorted && mCurrentSort != COCKTAIL_SORT){
                         // Set the current sort to cocktail sort
                         mCurrentSort = COCKTAIL_SORT;
                         // Load the text for cocktail sort
-                        mTexture->loadFromRenderedText("COCKTAIL SORT", {0xFF, 0xFF, 0xFF, 0xFF});
+                        mTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], {0xFF, 0xFF, 0xFF, 0xFF});
                     }
                     break;
                 // User presses the E key
                 case SDLK_e:
-                    // If the array is not sorted or stopped midexecution and if the current sort is not already shell sort
-                    if(!mIsSorted && !mIsSortStopped && mCurrentSort != SHELL_SORT){
+                    // If the array is not sorted and if the current sort is not already shell sort
+                    if(!mIsSorted && mCurrentSort != SHELL_SORT){
                         // Set the current sort to shell sort
                         mCurrentSort = SHELL_SORT;
                         // Load the text for shell sort
-                        mTexture->loadFromRenderedText("SHELL SORT", {0xFF, 0xFF, 0xFF, 0xFF});
+                        mTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], {0xFF, 0xFF, 0xFF, 0xFF});
                     }
                     break;
                 // User presses the H key
                 case SDLK_h:
-                    // If the array is not sorted or stopped midexecution and if the current sort is not already heap sort
-                    if(!mIsSorted && !mIsSortStopped && mCurrentSort != HEAP_SORT){
+                    // If the array is not sorted and if the current sort is not already heap sort
+                    if(!mIsSorted && mCurrentSort != HEAP_SORT){
                         // Set the current sort to heap sort
                         mCurrentSort = HEAP_SORT;
                         // Load the text for heap sort
-                        mTexture->loadFromRenderedText("HEAP SORT", {0xFF, 0xFF, 0xFF, 0xFF});
+                        mTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], {0xFF, 0xFF, 0xFF, 0xFF});
                     }
                     break;
                 // User presses the SPACEBAR key
                 case SDLK_SPACE:
                     // If the array is not sorted
-                    if(!mIsSorted){
+                    if(!mIsSorted && !mRequestSort){
                         // Stops and starts the sort
-                        mRequestSort = !mRequestSort;
-                    }
-                    break;
-                // User presses the F key
-                case SDLK_f:
-                    // If the array is being sorted
-                    if(mRequestSort){
+                        mRequestSort = true;
+                    } else if(mRequestSort){
                         // Fast forwards the sort
                         mIsFastForward = true;
                     }
                     break;
                 // User presses the S key
                 case SDLK_s:
-                    // If the array is sorted or stopped midexecution
-                    if(mIsSorted || mIsSortStopped){
+                    // If the array is sorted
+                    if(mIsSorted){
                         // Shuffles the array
                         mRequestShuffle = true;
                     }
@@ -247,44 +270,30 @@ void Visualizer::Engine::sort(){
             bubbleSort();
             break;
         case QUICK_SORT:
-            // Shuffles the array because quick sort cannot be stopped and resumed so it must be restarted
-            shuffle();
-            quickSort(0, mArray.size() - 1);
+            quickSort(0, mMAX_NUMBER - 1);
             break;
         case COCKTAIL_SORT:
-            // Shuffles the array because cocktail sort cannot be stopped and resumed (for now) so it must be restarted
-            shuffle();
             cocktailSort();
             break;
         case SHELL_SORT:
-            // Shuffles the array because shell sort cannot be stopped and resumed (for now) so it must be restarted
-            shuffle();
             shellSort();
             break;
         case HEAP_SORT:
-            // Shuffles the array because heap sort cannot be stopped and resumed (for now) so it must be restarted
-            shuffle();
             heapSort();
             break;
     }
-
-    // Once the array is sorted
-    if(!mIsSortStopped){
-        // The array is sorted
-        mIsSorted = true;
-        // The request is stopped
-        mRequestSort = false;
-        // The fast forward flag is reset
-        mIsFastForward = false;
-        // (Only for bubble sort for now), the resume index is reset
-        mResumeIndex = 0;
-    }
+    // The array is sorted
+    mIsSorted = true;
+    // The request is stopped
+    mRequestSort = false;
+    // The fast forward flag is reset
+    mIsFastForward = false;
 }
 
 void Visualizer::Engine::cocktailSort(){
     bool swapped = true;
     int start = 0;
-    int end = mArray.size() - 1;
+    int end = mMAX_NUMBER - 1;
  
     while (swapped) {
         /* 
@@ -299,23 +308,17 @@ void Visualizer::Engine::cocktailSort(){
         * the bubble sort
         */
         for (int i = start; i < end; ++i) {
-            
-            // Handle events everytime the loop repeats
-            handleEvents();
-            // If the sort is stopped or the application is closed, stop the sort
-            if(!mIsRunning || !mRequestSort){
-                mIsSortStopped = true;
-                return;
-            }
-
             if (mArray[i] > mArray[i + 1]) {
                 std::swap(mArray[i], mArray[i + 1]);
-                /*
-                * If the current index is a multiple of the update frequency, draw the array on the screen
-                * if fast forward is enabled, draw the array on the screen immediately
-                */
-                if(i % mUpdateFrequency == 0 && !mIsFastForward)
+                mSwapCount++;
+                if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
+                    // Handle events every few iterations
+                    handleEvents();
+                    if(!mIsRunning){
+                        return;
+                    }
                     draw();
+                }
                 swapped = true;
             }
         }
@@ -340,21 +343,17 @@ void Visualizer::Engine::cocktailSort(){
         * same comparison as in the previous stage
         */
         for (int i = end - 1; i >= start; --i) {
-
-            handleEvents();
-            if(!mIsRunning || !mRequestSort){
-                mIsSortStopped = true;
-                return;
-            }
-
             if (mArray[i] > mArray[i + 1]) {
                 std::swap(mArray[i], mArray[i + 1]);
-                /*
-                * If the current index is a multiple of the update frequency, draw the array on the screen
-                * if fast forward is enabled, draw the array on the screen immediately
-                */
-                if(i % mUpdateFrequency == 0 && !mIsFastForward)
+                mSwapCount++;
+                if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
+                    // Handle events every few iterations
+                    handleEvents();
+                    if(!mIsRunning){
+                        return;
+                    }
                     draw();
+                }
                 swapped = true;
             }
         }
@@ -365,9 +364,6 @@ void Visualizer::Engine::cocktailSort(){
         * smallest number to its rightful spot.
         */
         start++;
-
-        // Once the array is sorted set the sort stopped flag to false
-        mIsSortStopped = false;
     }
 }
 
@@ -376,29 +372,21 @@ void Visualizer::Engine::quickSort(int low, int high){
         int pi = partition(low, high);
 
         // If the sort is stopped or the application is closed while inside of partition, stop the sort
-        if(mIsSortStopped){
+        if(!mIsRunning){
             return;
         }
 
         quickSort(low, pi - 1);
         quickSort(pi + 1, high);
     }
-
-    // Once the array is sorted set the sort stopped flag to false only for the first call of quick sort
-    if(low == 0 && high == mArray.size() - 1 && !mIsSortStopped){
-        mIsSortStopped = false;
-    }
 }
 
 int Visualizer::Engine::partition(int low, int high){
-
-    // Handle events partition is called
+    // Handle events time partition is called
     handleEvents();
-    if(!mIsRunning || !mRequestSort){
-        mIsSortStopped = true;
+    if(!mIsRunning){
         return -1;
     }
-
     int pivot = mArray[high];
     int i = (low - 1);
  
@@ -406,65 +394,59 @@ int Visualizer::Engine::partition(int low, int high){
          if (mArray[j] < pivot) {
             i++;
             std::swap(mArray[i], mArray[j]);
-            /*
-            * If the current index is a multiple of the update frequency, draw the array on the screen
-            * if fast forward is enabled, draw the array on the screen immediately
-            */
-            if(j % mUpdateFrequency == 0 && !mIsFastForward)
+            mSwapCount++;
+            if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
                 draw();
+            }
         }
     }
     std::swap(mArray[i + 1], mArray[high]);
+    mSwapCount++;
     // If fast forward is enabled, draw the array on the screen immediately
-    if(!mIsFastForward)
+    if(mSwapCount % mUpdateFrequency && !mIsFastForward){
         draw();
+    }
     return (i + 1);
 }
 
 void Visualizer::Engine::bubbleSort(){
-    for (int i = mResumeIndex; i < mArray.size() - 1; i++){
-        for (int j = 0; j < mArray.size() - i - 1; j++){
-            // Handle events everytime the inner loop repeats
-            handleEvents();
-            if(!mIsRunning || !mRequestSort){
-                mIsSortStopped = true;
-                mResumeIndex = i;
-                return;
-            }
+    bool swapped;
+    for (int i = 0; i < mMAX_NUMBER - 1; i++){
+        swapped = false;
+        for (int j = 0; j < mMAX_NUMBER - i - 1; j++){
 
             if (mArray[j] > mArray[j+1]){
                 std::swap(mArray[j], mArray[j+1]);
-                /*
-                * If the current index is a multiple of the update frequency, draw the array on the screen
-                * if fast forward is enabled, draw the array on the screen immediately
-                */
-                if(j % mUpdateFrequency == 0 && !mIsFastForward)
+                swapped = true;
+                mSwapCount++;
+                if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
+                    // Handle events every few iterations
+                    handleEvents();
+                    if(!mIsRunning){
+                        return;
+                    }
                     draw();
+                }
             }
         }
-    }
 
-    // Once the array is sorted set the sort stopped flag to false
-    mIsSortStopped = false;
+        // If no two elements were swapped in the inner loop, the array is already sorted
+        if (!swapped) {
+            break;
+        }
+    }
 }
 
 void Visualizer::Engine::shellSort(){
     // Start with a big gap, then reduce the gap
-    for (int gap = mArray.size() / 2; gap > 0; gap /= 2){
+    for (int gap = mMAX_NUMBER / 2; gap > 0; gap /= 2){
         /*
         * Do a gapped insertion sort for this gap size.
         * The first gap elements a[0..gap-1] are already in gapped order
         * keep adding one more element until the entire array is
         * gap sorted 
         */
-        for (int i = gap; i < mArray.size(); i += 1){
-            // Handle events everytime the inner loop repeats
-            handleEvents();
-            if(!mIsRunning || !mRequestSort){
-                mIsSortStopped = true;
-                mResumeIndex = i;
-                return;
-            }
+        for (int i = gap; i < mMAX_NUMBER; i += 1){
             /*
             * Add a[i] to the elements that have been gap sorted
             * save a[i] in temp and make a hole at position i
@@ -478,27 +460,30 @@ void Visualizer::Engine::shellSort(){
             int j;            
             for (j = i; j >= gap && mArray[j - gap] > temp; j -= gap){
                 mArray[j] = mArray[j - gap];
-                /*
-                * If the current index is a multiple of the update frequency, draw the array on the screen
-                * if fast forward is enabled, draw the array on the screen immediately
-                */
-                if(j % mUpdateFrequency == 0 && !mIsFastForward)
+                mSwapCount++;
+                if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
+                    // Handle events every few iterations
+                    handleEvents();
+                    if(!mIsRunning){
+                        return;
+                    }
                     draw();
+                }
             }
 
             //  put temp (the original a[i]) in its correct location
             mArray[j] = temp;
-            /*
-            * If the current index is a multiple of the update frequency, draw the array on the screen
-            * if fast forward is enabled, draw the array on the screen immediately
-            */
-            if(j % mUpdateFrequency == 0 && !mIsFastForward)
+            mSwapCount++;
+            if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
+                // Handle events every few iterations
+                handleEvents();
+                if(!mIsRunning){
+                    return;
+                }
                 draw();
+            }
         }
     }
-
-    // Once the array is sorted set the sort stopped flag to false
-    mIsSortStopped = false;
 }
 
 void Visualizer::Engine::heapify(int n, int i){
@@ -524,21 +509,15 @@ void Visualizer::Engine::heapify(int n, int i){
  
     // If largest is not root
     if (largest != i) {
-        // Handle events everytime the inner loop repeats
-        handleEvents();
-        if(!mIsRunning || !mRequestSort){
-            mIsSortStopped = true;
-            mResumeIndex = i;
-            return;
-        }
-
         std::swap(mArray[i], mArray[largest]);
         
-        /*
-        * If the current index is a multiple of the update frequency, draw the array on the screen
-        * if fast forward is enabled, draw the array on the screen immediately
-        */
-        if(i % mUpdateFrequency == 0 && !mIsFastForward){
+        mSwapCount++;
+        if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
+            // Handle events every few iterations
+            handleEvents();
+            if(!mIsRunning){
+                return;
+            }
             draw();
         }
  
@@ -552,45 +531,39 @@ void Visualizer::Engine::heapify(int n, int i){
 
 void Visualizer::Engine::heapSort(){
     // Build heap (rearrange array)
-    for (int i = mArray.size() / 2 - 1; i >= 0; i--)
-        heapify(mArray.size(), i);
+    for (int i = mMAX_NUMBER / 2 - 1; i >= 0; i--)
+        heapify(mMAX_NUMBER, i);
  
     /*
     * One by one extract an element
     * from heap
     */
-    for (int i = mArray.size() - 1; i > 0; i--) {
-        // Handle events everytime the inner loop repeats
-        handleEvents();
-        if(!mIsRunning || !mRequestSort){
-            mIsSortStopped = true;
-            mResumeIndex = i;
-            return;
-        }
+    for (int i = mMAX_NUMBER - 1; i > 0; i--) {
  
         // Move current root to end
         std::swap(mArray[0], mArray[i]);
-        /*
-        * If the current index is a multiple of the update frequency, draw the array on the screen
-        * if fast forward is enabled, draw the array on the screen immediately
-        */
-        if(i % mUpdateFrequency == 0 && !mIsFastForward)
-            draw();
+        
+        mSwapCount++;
+        if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
+            // Handle events every few iterations
+            handleEvents();
+            if(!mIsRunning){
+                return;
+            }
+           draw();
+        }
  
         // call max heapify on the reduced heap
         heapify(i, 0);
     }
-
-    // Once the array is sorted set the sort stopped flag to false
-    mIsSortStopped = false;
 }
 
 void Visualizer::Engine::shuffle(){
     // Shuffle the array
     srand(time(NULL));
 
-    for(int i = 0; i < mArray.size(); i++){
-        int random = rand() % mArray.size();
+    for(int i = 0; i < mMAX_NUMBER; i++){
+        int random = rand() % mMAX_NUMBER;
         std::swap(mArray[i], mArray[random]);
         // Draw the array every 10% of the way through the shuffle
         if(i % (mMAX_NUMBER / 10) == 0)
@@ -605,15 +578,19 @@ void Visualizer::Engine::shuffle(){
     mRequestShuffle = false;
     // (Only for bubble sort for now), the resume index is reset
     mResumeIndex = 0;
+    // Reset the swap count
+    mSwapCount = 0;
 }
 
 void Visualizer::Engine::draw(){
-
     // Clear the screen
     SDL_RenderClear(mRenderer);
 
     // Render the sort name
-    mTexture->render(20, 20);
+    mTexture->render((mSize.x - mUsableWidth - mTexture->getWidth()) / 2, 20);
+
+    // Render the info text
+    mInfoTexture->render((mSize.x - mUsableWidth - mInfoTexture->getWidth()) / 2, mTexture->getHeight() + 40);
 
     // Render the array
     draw_rects();
@@ -624,7 +601,7 @@ void Visualizer::Engine::draw(){
 
 void Visualizer::Engine::draw_rects(){
     // Each element in the array is a rectangle
-    SDL_Rect rect;
+    SDL_FRect rect;
 
     // Set the starting color and ending color
     int startColorR = 0xf3;
@@ -641,20 +618,20 @@ void Visualizer::Engine::draw_rects(){
     double colorStepB = (endColorB - startColorB) / (double) mMAX_NUMBER;
 
     // Draw the rectangles
-    for(int i = 0; i < mArray.size(); i++){
+    for(int i = 0; i < mMAX_NUMBER; i++){
         // Set the color of each rectangle
         SDL_SetRenderDrawColor(mRenderer, startColorR + colorStepR * i, startColorG + colorStepG * i, startColorB + colorStepB * i, 0xFF);
         // Set the width of the rectangle to the width of the window divided by the number of elements in the array
-        rect.w = mSize.x / mMAX_NUMBER;
+        rect.w = (float) mUsableWidth / mMAX_NUMBER;
         // Set the height of the rectangle
-        rect.h = ((double) mSize.y / mMAX_NUMBER) * mArray[i];
+        rect.h = ((float) mSize.y / mMAX_NUMBER) * mArray[i];
         // Set the x coordinate by multiplying the index by the width of the rectangle
-        rect.x = i * rect.w;
+        rect.x = i * rect.w + (mSize.x - mUsableWidth);
         // Set the y coordinate by subtracting the height of the rectangle from the height of the window
         rect.y = mSize.y - rect.h;
 
         // Draw the rectangle
-        SDL_RenderFillRect(mRenderer, &rect);
+        SDL_RenderFillRectF(mRenderer, &rect);
     }
 
     // Set background color
