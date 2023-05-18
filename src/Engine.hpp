@@ -11,6 +11,7 @@
 #include <vector>
 #include <string>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
 
 #include "Utilities.hpp"
 #include "LTexture.hpp"
@@ -23,7 +24,7 @@ namespace Visualizer {
             * @param size The size of the window
             * @param max_elements The maximum number of elements in the array
             */
-            Engine(COUPLE size, const int max_elements);
+            Engine(const COUPLE size, const int max_elements);
 
             /*!
             * @brief Engine constructor
@@ -31,7 +32,7 @@ namespace Visualizer {
             * @param max_elements The maximum number of elements in the array
             * @param window_title The title of the window
             */
-            Engine(COUPLE size, const int max_elements, const char* window_title);
+            Engine(const COUPLE size, const int max_elements, const char* window_title);
 
             /*!
             * @brief Engine constructor
@@ -40,7 +41,7 @@ namespace Visualizer {
             * @param window_title The title of the window
             * @param update_frequency The frequency with which the window is updated when sorting
             */
-            Engine(COUPLE size, const int max_elements, const char* window_title, int update_frequency);
+            Engine(const COUPLE size, const int max_elements, const char* window_title, int update_frequency);
 
             /*!
             * @brief Engine destructor
@@ -61,6 +62,7 @@ namespace Visualizer {
             bool mRequestShuffle = false; /*! Whether the user requested a shuffle or not (s was pressed)*/
             bool mIsSorted = false; /*! Whether the array is sorted or not (end of sort)*/
             bool mIsFastForward = false; /*! Whether the sort is fast forwarded or not (f was pressed while sorting)*/
+            bool mIsSoundEnabled = false; /*! Whether the sound is enabled or not (x was pressed)*/
 
             std::string mWindowTitle = "SDL Sort Visualizer"; /*! The title of the window */
             int mSwapCount = 0; /*! The number of swaps performed during the sort */
@@ -76,6 +78,8 @@ namespace Visualizer {
 
             TTF_Font* mFontSmall; /*! The font used to draw the text */
             TTF_Font* mFontLarge; /*! The font used to draw the text */
+
+            Mix_Chunk* mSwapSound; /*! The sound played when a swap is performed */
 
             int mUsableWidth; /*! The usable width of the window */
 

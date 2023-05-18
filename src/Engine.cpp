@@ -6,6 +6,7 @@
 //
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
@@ -75,6 +76,12 @@ Visualizer::Engine::~Engine(){
     // Close the fonts
     TTF_CloseFont(mFontSmall);
     TTF_CloseFont(mFontLarge);
+    mFontSmall = NULL;
+    mFontLarge = NULL;
+
+    // Destroy the music
+    Mix_FreeChunk(mSwapSound);
+    mSwapSound = NULL;
 
     // Destroy the renderer and the window
     SDL_DestroyRenderer(mRenderer);
@@ -86,6 +93,7 @@ Visualizer::Engine::~Engine(){
 
     // Quit SDL subsystems
     SDL_Quit();
+    Mix_Quit();
     TTF_Quit();
 }
 
@@ -112,7 +120,7 @@ void Visualizer::Engine::run(){
 
 bool Visualizer::Engine::init(){
     // Initialize SDL
-    if(SDL_Init(SDL_INIT_VIDEO) < 0){
+    if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0){
         printf("SDL could not initialize! SDL error: %s\n", SDL_GetError());
         return false;
     }
@@ -146,6 +154,12 @@ bool Visualizer::Engine::init(){
         return false;
     }
 
+    // Initialize SDL_mixer
+    if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0){
+        printf("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
+        return false;
+    }
+
     // Open the font used for the text
     mFontSmall = TTF_OpenFont("../res/Roboto-Regular.ttf", mSize.y / 35);
 
@@ -172,6 +186,12 @@ bool Visualizer::Engine::init(){
     mInfoTexture = new LTexture(mRenderer, mFontSmall);
     // Load the info text
     mInfoTexture->loadFromRenderedText(gINFO_TEXT, {0xFF, 0xFF, 0xFF, 0xFF}, true);
+    // Load sound effects
+    mSwapSound = Mix_LoadWAV("../res/swap.wav");
+    if(mSwapSound == NULL){
+        printf("Failed to load swap sound effect! SDL_mixer Error: %s\n", Mix_GetError());
+    }
+
     // Set background color
     SDL_SetRenderDrawColor(mRenderer, 0x4a, 0x18, 0xa8, 0xFF);
     return true;
@@ -311,6 +331,11 @@ void Visualizer::Engine::handleEvents(){
                         mRequestShuffle = true;
                     }
                     break;
+                // User presses the X key
+                case SDLK_x:
+                    // Enables and disables the sound
+                    mIsSoundEnabled = !mIsSoundEnabled;
+                    break;
             }
         }
     }
@@ -376,9 +401,10 @@ void Visualizer::Engine::cocktailSort(){
                 if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
                     // Handle events every few iterations
                     handleEvents();
-                    if(!mIsRunning){
+                    if(!mIsRunning)
                         return;
-                    }
+                    if(mIsSoundEnabled)
+                        Mix_PlayChannel(-1, mSwapSound, 0);
                     draw();
                 }
                 swapped = true;
@@ -411,9 +437,10 @@ void Visualizer::Engine::cocktailSort(){
                 if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
                     // Handle events every few iterations
                     handleEvents();
-                    if(!mIsRunning){
+                    if(!mIsRunning)
                         return;
-                    }
+                    if(mIsSoundEnabled)
+                        Mix_PlayChannel(-1, mSwapSound, 0);
                     draw();
                 }
                 swapped = true;
@@ -446,9 +473,8 @@ void Visualizer::Engine::quickSort(int low, int high){
 int Visualizer::Engine::partition(int low, int high){
     // Handle events time partition is called
     handleEvents();
-    if(!mIsRunning){
+    if(!mIsRunning)
         return -1;
-    }
     int pivot = mArray[high];
     int i = (low - 1);
  
@@ -458,6 +484,8 @@ int Visualizer::Engine::partition(int low, int high){
             std::swap(mArray[i], mArray[j]);
             mSwapCount++;
             if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
+                if(mIsSoundEnabled)
+                    Mix_PlayChannel(-1, mSwapSound, 0);
                 draw();
             }
         }
@@ -466,6 +494,8 @@ int Visualizer::Engine::partition(int low, int high){
     mSwapCount++;
     // If fast forward is enabled, draw the array on the screen immediately
     if(mSwapCount % mUpdateFrequency && !mIsFastForward){
+        if(mIsSoundEnabled)
+            Mix_PlayChannel(-1, mSwapSound, 0);
         draw();
     }
     return (i + 1);
@@ -484,9 +514,10 @@ void Visualizer::Engine::bubbleSort(){
                 if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
                     // Handle events every few iterations
                     handleEvents();
-                    if(!mIsRunning){
+                    if(!mIsRunning)
                         return;
-                    }
+                    if(mIsSoundEnabled)
+                        Mix_PlayChannel(-1, mSwapSound, 0);
                     draw();
                 }
             }
@@ -526,9 +557,10 @@ void Visualizer::Engine::shellSort(){
                 if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
                     // Handle events every few iterations
                     handleEvents();
-                    if(!mIsRunning){
+                    if(!mIsRunning)
                         return;
-                    }
+                    if(mIsSoundEnabled)
+                        Mix_PlayChannel(-1, mSwapSound, 0);
                     draw();
                 }
             }
@@ -539,9 +571,8 @@ void Visualizer::Engine::shellSort(){
             if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
                 // Handle events every few iterations
                 handleEvents();
-                if(!mIsRunning){
+                if(!mIsRunning)
                     return;
-                }
                 draw();
             }
         }
@@ -577,9 +608,10 @@ void Visualizer::Engine::heapify(int n, int i){
         if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
             // Handle events every few iterations
             handleEvents();
-            if(!mIsRunning){
+            if(!mIsRunning)
                 return;
-            }
+            if(mIsSoundEnabled)
+                Mix_PlayChannel(-1, mSwapSound, 0);
             draw();
         }
  
@@ -609,10 +641,11 @@ void Visualizer::Engine::heapSort(){
         if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
             // Handle events every few iterations
             handleEvents();
-            if(!mIsRunning){
+            if(!mIsRunning)
                 return;
-            }
-           draw();
+            if(mIsSoundEnabled)
+                Mix_PlayChannel(-1, mSwapSound, 0);
+            draw();
         }
  
         // call max heapify on the reduced heap
@@ -655,9 +688,10 @@ void Visualizer::Engine::merge(int left, int mid, int right){
         if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
             // Handle events every few iterations
             handleEvents();
-            if(!mIsRunning){
+            if(!mIsRunning)
                 return;
-            }
+            if(mIsSoundEnabled)
+                Mix_PlayChannel(-1, mSwapSound, 0);
             draw();
         }
         if (leftArray[indexOfSubArrayOne] <= rightArray[indexOfSubArrayTwo]) {
@@ -680,9 +714,10 @@ void Visualizer::Engine::merge(int left, int mid, int right){
         if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
             // Handle events every few iterations
             handleEvents();
-            if(!mIsRunning){
+            if(!mIsRunning)
                 return;
-            }
+            if(mIsSoundEnabled)
+                Mix_PlayChannel(-1, mSwapSound, 0);
             draw();
         }
 
@@ -699,9 +734,10 @@ void Visualizer::Engine::merge(int left, int mid, int right){
         if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
             // Handle events every few iterations
             handleEvents();
-            if(!mIsRunning){
+            if(!mIsRunning)
                 return;
-            }
+            if(mIsSoundEnabled)
+                Mix_PlayChannel(-1, mSwapSound, 0);
             draw();
         }
 
@@ -732,9 +768,10 @@ void Visualizer::Engine::selectionSort(){
             if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
                 // Handle events every few iterations
                 handleEvents();
-                if(!mIsRunning){
+                if(!mIsRunning)
                     return;
-                }
+                if(mIsSoundEnabled)
+                    Mix_PlayChannel(-1, mSwapSound, 0);
                 draw();
             }
           }
@@ -749,9 +786,10 @@ void Visualizer::Engine::selectionSort(){
             if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
                 // Handle events every few iterations
                 handleEvents();
-                if(!mIsRunning){
+                if(!mIsRunning)
                     return;
-                }
+                if(mIsSoundEnabled)
+                    Mix_PlayChannel(-1, mSwapSound, 0);
                 draw();
             }
         }
@@ -778,9 +816,10 @@ void Visualizer::Engine::insertionSort(){
             if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
                 // Handle events every few iterations
                 handleEvents();
-                if(!mIsRunning){
+                if(!mIsRunning)
                     return;
-                }
+                if(mIsSoundEnabled)
+                    Mix_PlayChannel(-1, mSwapSound, 0);
                 draw();
             }
         }
@@ -796,8 +835,11 @@ void Visualizer::Engine::shuffle(){
         int random = rand() % mMAX_NUMBER;
         std::swap(mArray[i], mArray[random]);
         // Draw the array every 10% of the way through the shuffle
-        if(i % (mMAX_NUMBER / 10) == 0)
+        if(i % (mMAX_NUMBER / 10) == 0){
+            if(mIsSoundEnabled)
+                Mix_PlayChannel(-1, mSwapSound, 0);
             draw();
+        }
     }
 
     //! Draw the array one last time (I MIGHT NEED TO ADD THIS TO THE SORTING ALGORITHMS AS WELL)
