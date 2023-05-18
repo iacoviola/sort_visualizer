@@ -14,7 +14,7 @@
 
 #include "Engine.hpp"
 
-Visualizer::Engine::Engine(COUPLE size, const int max_elements) 
+Visualizer::Engine::Engine(const COUPLE size, const int max_elements) 
 : mSize(size), mMAX_NUMBER(max_elements), mUsableWidth(size.x - (size.x / 4)), mArray(max_elements) {
 
     // Initialize the engine
@@ -48,7 +48,7 @@ Visualizer::Engine::Engine(const COUPLE size, const int max_elements, const char
     shuffle();
 }
 
-Visualizer::Engine::Engine(COUPLE size, const int max_elements, const char* window_title, int update_frequency) 
+Visualizer::Engine::Engine(const COUPLE size, const int max_elements, const char* window_title, int update_frequency) 
 : mSize(size), mMAX_NUMBER(max_elements), mWindowTitle(window_title), mUpdateFrequency(update_frequency), mUsableWidth(size.x - (size.x / 4)), mArray(max_elements) {
     
     // Initialize the engine
@@ -193,6 +193,8 @@ void Visualizer::Engine::handleEvents(){
                 mSize.y = e.window.data2;
                 // Resize the window
                 SDL_SetWindowSize(mWindow, mSize.x, mSize.y);
+                // Change usable area
+                mUsableWidth = mSize.x - (mSize.x / 4);
             }
         }
         // User presses a key 
@@ -252,6 +254,36 @@ void Visualizer::Engine::handleEvents(){
                         mTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], {0xFF, 0xFF, 0xFF, 0xFF});
                     }
                     break;
+                // User presses the M key
+                case SDLK_m:
+                    // If the array is not sorted and if the current sort is not already merge sort
+                    if(!mRequestSort && mCurrentSort != MERGE_SORT){
+                        // Set the current sort to merge sort
+                        mCurrentSort = MERGE_SORT;
+                        // Load the text for merge sort
+                        mTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], {0xFF, 0xFF, 0xFF, 0xFF});
+                    }
+                    break;
+                // User presses the L key
+                case SDLK_l:
+                    // If the array is not sorted and if the current sort is not already selection sort
+                    if(!mRequestSort && mCurrentSort != SELECTION_SORT){
+                        // Set the current sort to selection sort
+                        mCurrentSort = SELECTION_SORT;
+                        // Load the text for selection sort
+                        mTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], {0xFF, 0xFF, 0xFF, 0xFF});
+                    }
+                    break;
+                // User presses the I key
+                case SDLK_i:
+                    // If the array is not sorted and if the current sort is not already insertion sort
+                    if(!mRequestSort && mCurrentSort != INSERTION_SORT){
+                        // Set the current sort to insertion sort
+                        mCurrentSort = INSERTION_SORT;
+                        // Load the text for insertion sort
+                        mTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], {0xFF, 0xFF, 0xFF, 0xFF});
+                    }
+                    break;
                 // User presses the SPACEBAR key
                 case SDLK_SPACE:
                     // If the array is not sorted
@@ -293,6 +325,15 @@ void Visualizer::Engine::sort(){
             break;
         case HEAP_SORT:
             heapSort();
+            break;
+        case MERGE_SORT:
+            mergeSort(0, mMAX_NUMBER - 1);
+            break;
+        case SELECTION_SORT:
+            selectionSort();
+            break;
+        case INSERTION_SORT:
+            insertionSort();
             break;
     }
     // The array is sorted
@@ -568,6 +609,174 @@ void Visualizer::Engine::heapSort(){
  
         // call max heapify on the reduced heap
         heapify(i, 0);
+    }
+}
+
+void Visualizer::Engine::mergeSort(int l, int r)
+{
+    if (l >= r)
+        return; // Returns recursively
+ 
+    int mid = l + (r - l) / 2;
+    mergeSort(l, mid);
+    mergeSort(mid + 1, r);
+    merge(l, mid, r);
+}
+
+void Visualizer::Engine::merge(int left, int mid, int right){
+    int subArrayOne = mid - left + 1;
+    int subArrayTwo = right - mid;
+ 
+    // Create temp arrays
+    int *leftArray = new int[subArrayOne];
+    int *rightArray = new int[subArrayTwo];
+ 
+    // Copy data to temp arrays leftArray[] and rightArray[]
+    for (int i = 0; i < subArrayOne; i++)
+        leftArray[i] = mArray[left + i];
+    for (int j = 0; j < subArrayTwo; j++)
+        rightArray[j] = mArray[mid + 1 + j];
+ 
+    int indexOfSubArrayOne = 0; // Initial index of first sub-array
+    int indexOfSubArrayTwo = 0; // Initial index of second sub-array
+    int indexOfMergedArray = left; // Initial index of merged array
+ 
+    // Merge the temp arrays back into array[left..right]
+    while (indexOfSubArrayOne < subArrayOne && indexOfSubArrayTwo < subArrayTwo) {
+        mSwapCount++;
+        if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
+            // Handle events every few iterations
+            handleEvents();
+            if(!mIsRunning){
+                return;
+            }
+            draw();
+        }
+        if (leftArray[indexOfSubArrayOne] <= rightArray[indexOfSubArrayTwo]) {
+            mArray[indexOfMergedArray] = leftArray[indexOfSubArrayOne];
+            indexOfSubArrayOne++;
+        }
+        else {
+            mArray[indexOfMergedArray] = rightArray[indexOfSubArrayTwo];
+            indexOfSubArrayTwo++;
+        }
+        indexOfMergedArray++;
+    }
+    /*
+    * Copy the remaining elements of
+    * left[], if there are any
+    */
+    while (indexOfSubArrayOne < subArrayOne) {
+        mArray[indexOfMergedArray] = leftArray[indexOfSubArrayOne];
+        mSwapCount++;
+        if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
+            // Handle events every few iterations
+            handleEvents();
+            if(!mIsRunning){
+                return;
+            }
+            draw();
+        }
+
+        indexOfSubArrayOne++;
+        indexOfMergedArray++;
+    }
+    /*
+    * Copy the remaining elements of
+    * right[], if there are any
+    */
+    while (indexOfSubArrayTwo < subArrayTwo) {
+        mArray[indexOfMergedArray] = rightArray[indexOfSubArrayTwo];
+        mSwapCount++;
+        if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
+            // Handle events every few iterations
+            handleEvents();
+            if(!mIsRunning){
+                return;
+            }
+            draw();
+        }
+
+        indexOfSubArrayTwo++;
+        indexOfMergedArray++;
+    }
+    delete[] leftArray;
+    delete[] rightArray;
+}
+
+void Visualizer::Engine::selectionSort(){
+    int i, j, min_idx;
+    /*
+    * One by one move boundary of
+    * unsorted subarray
+    */
+    for (i = 0; i < mMAX_NUMBER - 1; i++)
+    {
+        /*
+        * Find the minimum element in
+        * unsorted array
+        */
+        min_idx = i;
+        for (j = i + 1; j < mMAX_NUMBER; j++){
+          if (mArray[j] < mArray[min_idx]){
+            min_idx = j;
+            mSwapCount++;
+            if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
+                // Handle events every few iterations
+                handleEvents();
+                if(!mIsRunning){
+                    return;
+                }
+                draw();
+            }
+          }
+        }
+        /*
+        * Swap the found minimum element
+        * with the first element
+        */
+        if (min_idx != i){
+            std::swap(mArray[min_idx], mArray[i]);
+            mSwapCount++;
+            if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
+                // Handle events every few iterations
+                handleEvents();
+                if(!mIsRunning){
+                    return;
+                }
+                draw();
+            }
+        }
+    }
+}
+
+void Visualizer::Engine::insertionSort(){
+    int i, key, j;
+    for (i = 1; i < mMAX_NUMBER; i++){
+        key = mArray[i];
+        j = i - 1;
+ 
+        /*
+        * Move elements of arr[0..i-1], 
+        * that are greater than key, to one
+        * position ahead of their
+        * current position
+        */
+        while (j >= 0 && mArray[j] > key){
+            mArray[j + 1] = mArray[j];
+            j = j - 1;
+
+            mSwapCount++;
+            if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
+                // Handle events every few iterations
+                handleEvents();
+                if(!mIsRunning){
+                    return;
+                }
+                draw();
+            }
+        }
+        mArray[j + 1] = key;
     }
 }
 

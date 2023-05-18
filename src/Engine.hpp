@@ -137,7 +137,32 @@ namespace Visualizer {
             * @brief Sorts the array using heap sort
             */
             void heapSort();
+
+            /*!
+            * @brief Utility function used by merge sort
+            * @param l The lower bound of the array
+            * @param r The upper bound of the array
+            * @param m The middle index of the array
+            */
+            void merge(int l, int m, int r);
+
+            /*!
+            * @brief Sorts the array using merge sort
+            * @param l The lower bound of the array
+            * @param r The upper bound of the array
+            */
+            void mergeSort(int l, int r);
             
+            /*
+            * @brief Sorts the array using selection sort
+            */
+            void selectionSort();
+
+            /*!
+            * @brief Sorts the array using insertion sort
+            */
+            void insertionSort();
+
             /*!
             * @brief Shuffles the array using the Fisher-Yates algorithm
             */
