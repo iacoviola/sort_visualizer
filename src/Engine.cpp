@@ -12,6 +12,7 @@
 #include <stdexcept>
 #include <numeric>
 #include <cmath>
+#include <sstream>
 
 #include "Engine.hpp"
 
@@ -49,28 +50,13 @@ Visualizer::Engine::Engine(const COUPLE size, const int max_elements, const char
     shuffle();
 }
 
-Visualizer::Engine::Engine(const COUPLE size, const int max_elements, const char* window_title, int update_frequency) 
-: mSize(size), mMAX_NUMBER(max_elements), mWindowTitle(window_title), mUpdateFrequency(update_frequency), mUsableWidth(size.x - (size.x / 4)), mArray(max_elements) {
-    
-    // Initialize the engine
-    if(!init()){
-        throw std::runtime_error("Failed to initialize!");
-    }
-    
-    // Fill the array with numbers from 1 to mMAX_NUMBER
-    std::iota(mArray.begin(), mArray.end(), 1);
-
-    // Fill the array with numbers from 1 to mMAX_NUMBER
-    //fill_array();
-    // Shuffle the array
-    shuffle();
-}
-
 Visualizer::Engine::~Engine(){
     // Deallocate memory destroying the elements used by the texture
     mTexture->free();
     // Deallocate memory destroying the elements used by the info texture
     mInfoTexture->free();
+    // Deallocate memory destroying the elements used by the speed texture
+    mSpeedTexture->free();
 
     // Close the fonts
     TTF_CloseFont(mFontSmall);
@@ -172,6 +158,12 @@ bool Visualizer::Engine::init(){
     mInfoTexture = new LTexture(mRenderer, mFontSmall);
     // Load the info text
     mInfoTexture->loadFromRenderedText(gINFO_TEXT, {0xFF, 0xFF, 0xFF, 0xFF}, true);
+    // Create the texture used for the speed text
+    mSpeedTexture = new LTexture(mRenderer, mFontSmall);
+    // Load the speed text
+    std::stringstream speed_text;
+    speed_text << "Speed: " << gSPEEDS[mCurrentSpeed] << "x";
+    mSpeedTexture->loadFromRenderedText(speed_text.str(), {0xFF, 0xFF, 0xFF, 0xFF}, true);
     // Set background color
     SDL_SetRenderDrawColor(mRenderer, 0x4a, 0x18, 0xa8, 0xFF);
     return true;
@@ -311,6 +303,26 @@ void Visualizer::Engine::handleEvents(){
                         mRequestShuffle = true;
                     }
                     break;
+                // User presses the down arrow key
+                case SDLK_DOWN:
+                    if(mCurrentSpeed > 0){
+                        // Decreases the speed
+                        mCurrentSpeed--;
+                        std::stringstream ss;
+                        ss << "Speed: " << gSPEEDS[mCurrentSpeed] << "x";
+                        mSpeedTexture->loadFromRenderedText(ss.str(), {0xFF, 0xFF, 0xFF, 0xFF});
+                    }
+                    break;
+                // User presses the up arrow key
+                case SDLK_UP:
+                    if(mCurrentSpeed < 5){
+                        // Decreases the speed
+                        mCurrentSpeed++;
+                        std::stringstream ss;
+                        ss << "Speed: " << gSPEEDS[mCurrentSpeed] << "x";
+                        mSpeedTexture->loadFromRenderedText(ss.str(), {0xFF, 0xFF, 0xFF, 0xFF});
+                    }
+                    break;
             }
         }
     }
@@ -373,7 +385,7 @@ void Visualizer::Engine::cocktailSort(){
             if (mArray[i] > mArray[i + 1]) {
                 std::swap(mArray[i], mArray[i + 1]);
                 mSwapCount++;
-                if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
+                if(mSwapCount % gSPEEDS[mCurrentSpeed] == 0 && !mIsFastForward){
                     // Handle events every few iterations
                     handleEvents();
                     if(!mIsRunning){
@@ -408,7 +420,7 @@ void Visualizer::Engine::cocktailSort(){
             if (mArray[i] > mArray[i + 1]) {
                 std::swap(mArray[i], mArray[i + 1]);
                 mSwapCount++;
-                if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
+                if(mSwapCount % gSPEEDS[mCurrentSpeed] == 0 && !mIsFastForward){
                     // Handle events every few iterations
                     handleEvents();
                     if(!mIsRunning){
@@ -457,7 +469,7 @@ int Visualizer::Engine::partition(int low, int high){
             i++;
             std::swap(mArray[i], mArray[j]);
             mSwapCount++;
-            if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
+            if(mSwapCount % gSPEEDS[mCurrentSpeed] == 0 && !mIsFastForward){
                 draw();
             }
         }
@@ -465,7 +477,7 @@ int Visualizer::Engine::partition(int low, int high){
     std::swap(mArray[i + 1], mArray[high]);
     mSwapCount++;
     // If fast forward is enabled, draw the array on the screen immediately
-    if(mSwapCount % mUpdateFrequency && !mIsFastForward){
+    if(mSwapCount % gSPEEDS[mCurrentSpeed] && !mIsFastForward){
         draw();
     }
     return (i + 1);
@@ -481,7 +493,7 @@ void Visualizer::Engine::bubbleSort(){
                 std::swap(mArray[j], mArray[j+1]);
                 swapped = true;
                 mSwapCount++;
-                if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
+                if(mSwapCount % gSPEEDS[mCurrentSpeed] == 0 && !mIsFastForward){
                     // Handle events every few iterations
                     handleEvents();
                     if(!mIsRunning){
@@ -523,7 +535,7 @@ void Visualizer::Engine::shellSort(){
             for (j = i; j >= gap && mArray[j - gap] > temp; j -= gap){
                 mArray[j] = mArray[j - gap];
                 mSwapCount++;
-                if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
+                if(mSwapCount % gSPEEDS[mCurrentSpeed] == 0 && !mIsFastForward){
                     // Handle events every few iterations
                     handleEvents();
                     if(!mIsRunning){
@@ -536,7 +548,7 @@ void Visualizer::Engine::shellSort(){
             //  put temp (the original a[i]) in its correct location
             mArray[j] = temp;
             mSwapCount++;
-            if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
+            if(mSwapCount % gSPEEDS[mCurrentSpeed] == 0 && !mIsFastForward){
                 // Handle events every few iterations
                 handleEvents();
                 if(!mIsRunning){
@@ -574,7 +586,7 @@ void Visualizer::Engine::heapify(int n, int i){
         std::swap(mArray[i], mArray[largest]);
         
         mSwapCount++;
-        if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
+        if(mSwapCount % gSPEEDS[mCurrentSpeed] == 0 && !mIsFastForward){
             // Handle events every few iterations
             handleEvents();
             if(!mIsRunning){
@@ -606,7 +618,7 @@ void Visualizer::Engine::heapSort(){
         std::swap(mArray[0], mArray[i]);
         
         mSwapCount++;
-        if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
+        if(mSwapCount % gSPEEDS[mCurrentSpeed] == 0 && !mIsFastForward){
             // Handle events every few iterations
             handleEvents();
             if(!mIsRunning){
@@ -652,7 +664,7 @@ void Visualizer::Engine::merge(int left, int mid, int right){
     // Merge the temp arrays back into array[left..right]
     while (indexOfSubArrayOne < subArrayOne && indexOfSubArrayTwo < subArrayTwo) {
         mSwapCount++;
-        if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
+        if(mSwapCount % gSPEEDS[mCurrentSpeed] == 0 && !mIsFastForward){
             // Handle events every few iterations
             handleEvents();
             if(!mIsRunning){
@@ -677,7 +689,7 @@ void Visualizer::Engine::merge(int left, int mid, int right){
     while (indexOfSubArrayOne < subArrayOne) {
         mArray[indexOfMergedArray] = leftArray[indexOfSubArrayOne];
         mSwapCount++;
-        if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
+        if(mSwapCount % gSPEEDS[mCurrentSpeed] == 0 && !mIsFastForward){
             // Handle events every few iterations
             handleEvents();
             if(!mIsRunning){
@@ -696,7 +708,7 @@ void Visualizer::Engine::merge(int left, int mid, int right){
     while (indexOfSubArrayTwo < subArrayTwo) {
         mArray[indexOfMergedArray] = rightArray[indexOfSubArrayTwo];
         mSwapCount++;
-        if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
+        if(mSwapCount % gSPEEDS[mCurrentSpeed] == 0 && !mIsFastForward){
             // Handle events every few iterations
             handleEvents();
             if(!mIsRunning){
@@ -729,7 +741,7 @@ void Visualizer::Engine::selectionSort(){
           if (mArray[j] < mArray[min_idx]){
             min_idx = j;
             mSwapCount++;
-            if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
+            if(mSwapCount % gSPEEDS[mCurrentSpeed] == 0 && !mIsFastForward){
                 // Handle events every few iterations
                 handleEvents();
                 if(!mIsRunning){
@@ -746,7 +758,7 @@ void Visualizer::Engine::selectionSort(){
         if (min_idx != i){
             std::swap(mArray[min_idx], mArray[i]);
             mSwapCount++;
-            if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
+            if(mSwapCount % gSPEEDS[mCurrentSpeed] == 0 && !mIsFastForward){
                 // Handle events every few iterations
                 handleEvents();
                 if(!mIsRunning){
@@ -775,7 +787,7 @@ void Visualizer::Engine::insertionSort(){
             j = j - 1;
 
             mSwapCount++;
-            if(mSwapCount % mUpdateFrequency == 0 && !mIsFastForward){
+            if(mSwapCount % gSPEEDS[mCurrentSpeed] == 0 && !mIsFastForward){
                 // Handle events every few iterations
                 handleEvents();
                 if(!mIsRunning){
@@ -817,10 +829,13 @@ void Visualizer::Engine::draw(){
     SDL_RenderClear(mRenderer);
 
     // Render the sort name
-    mTexture->render((mSize.x - mUsableWidth - mTexture->getWidth()) / 2, 20);
+    mTexture->render((mSize.x - mUsableWidth - mTexture->getWidth()) / 2, mSize.y / 30);
 
     // Render the info text
-    mInfoTexture->render((mSize.x - mUsableWidth - mInfoTexture->getWidth()) / 2, mTexture->getHeight() + 40);
+    mInfoTexture->render((mSize.x - mUsableWidth - mInfoTexture->getWidth()) / 2, mTexture->getHeight() + mSize.y / 15);
+
+    // Render the speed text
+    mSpeedTexture->render((mSize.x - mUsableWidth - mSpeedTexture->getWidth()) / 2, mInfoTexture->getHeight() + mTexture->getHeight() + mSize.y / 10);
 
     // Render the array
     draw_rects();

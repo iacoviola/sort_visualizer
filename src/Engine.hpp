@@ -34,15 +34,6 @@ namespace Visualizer {
             Engine(COUPLE size, const int max_elements, const char* window_title);
 
             /*!
-            * @brief Engine constructor
-            * @param size The size of the window
-            * @param max_elements The maximum number of elements in the array
-            * @param window_title The title of the window
-            * @param update_frequency The frequency with which the window is updated when sorting
-            */
-            Engine(COUPLE size, const int max_elements, const char* window_title, int update_frequency);
-
-            /*!
             * @brief Engine destructor
             */
             ~Engine();
@@ -63,9 +54,12 @@ namespace Visualizer {
             bool mIsFastForward = false; /*! Whether the sort is fast forwarded or not (f was pressed while sorting)*/
 
             std::string mWindowTitle = "SDL Sort Visualizer"; /*! The title of the window */
+            
             int mSwapCount = 0; /*! The number of swaps performed during the sort */
-            int mUpdateFrequency = 10; /*! The frequency with which the window is updated when sorting */
             int mResumeIndex = 0; /*! The index from which the sort should resume (used when the sort is stopped, only used for bubble sort for now) */
+            
+            int mCurrentSpeed = 0; /*! The currently selected drawing speed */
+
             SORT_IDENTIFIER mCurrentSort = BUBBLE_SORT; /*! The currently selected sort algorithm */
 
             SDL_Renderer* mRenderer = NULL; /*! The main renderer */
@@ -73,6 +67,7 @@ namespace Visualizer {
 
             LTexture* mTexture; /*! The texture used to draw the text */
             LTexture* mInfoTexture; /*! The texture used to draw the info text */
+            LTexture* mSpeedTexture; /*! The texture used to draw the speed text */
 
             TTF_Font* mFontSmall; /*! The font used to draw the text */
             TTF_Font* mFontLarge; /*! The font used to draw the text */

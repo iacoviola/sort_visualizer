@@ -13,7 +13,7 @@
 
 int main(int argc, char * argv[]) {
     try {
-        Visualizer::Engine engine({800, 600}, 400, "SDL Sort Visualizer", 20);
+        Visualizer::Engine engine({800, 600}, 400, "SDL Sort Visualizer");
         engine.run();
     } catch (std::runtime_error &e) {
         printf("%s\n", e.what());

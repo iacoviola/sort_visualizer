@@ -46,5 +46,7 @@ const std::string gSORT_NAMES[] = {
 
 // String used for the info text
 const std::string gINFO_TEXT = " B - bubble sort \n E - shell sort \n Q - quick sort \n H - heap sort \n C - cocktail sort \n M - merge sort \n L - selection sort \n I - insertion sort \n ------- \n Spacebar - start/ff \n S - shuffle ";
+// Save the different speeds
+const int gSPEEDS[] = { 1, 5, 10, 20, 50, 100 };
 
 #endif /* Utilities_hpp */
