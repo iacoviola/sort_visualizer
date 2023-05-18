@@ -58,7 +58,7 @@ namespace Visualizer {
             int mSwapCount = 0; /*! The number of swaps performed during the sort */
             int mResumeIndex = 0; /*! The index from which the sort should resume (used when the sort is stopped, only used for bubble sort for now) */
             
-            int mCurrentSpeed = 0; /*! The currently selected drawing speed */
+            int mCurrentSpeed = 3; /*! The currently selected drawing speed */
 
             SORT_IDENTIFIER mCurrentSort = BUBBLE_SORT; /*! The currently selected sort algorithm */
 
@@ -68,6 +68,7 @@ namespace Visualizer {
             LTexture* mTexture; /*! The texture used to draw the text */
             LTexture* mInfoTexture; /*! The texture used to draw the info text */
             LTexture* mSpeedTexture; /*! The texture used to draw the speed text */
+            LTexture* mSwapTexture; /*! The texture used to draw the swap count text */
 
             TTF_Font* mFontSmall; /*! The font used to draw the text */
             TTF_Font* mFontLarge; /*! The font used to draw the text */

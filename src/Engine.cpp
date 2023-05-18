@@ -164,6 +164,14 @@ bool Visualizer::Engine::init(){
     std::stringstream speed_text;
     speed_text << "Speed: " << gSPEEDS[mCurrentSpeed] << "x";
     mSpeedTexture->loadFromRenderedText(speed_text.str(), {0xFF, 0xFF, 0xFF, 0xFF}, true);
+
+    // Create the texture used for the swap text
+    mSwapTexture = new LTexture(mRenderer, mFontSmall);
+    //Load the swap texture
+    std::stringstream swap_text;
+    swap_text << "Swaps: " << mSwapCount;
+    mSwapTexture->loadFromRenderedText(swap_text.str(), {0xFF, 0xFF, 0xFF, 0xFF}, true);
+
     // Set background color
     SDL_SetRenderDrawColor(mRenderer, 0x4a, 0x18, 0xa8, 0xFF);
     return true;
@@ -828,14 +836,29 @@ void Visualizer::Engine::draw(){
     // Clear the screen
     SDL_RenderClear(mRenderer);
 
+    int spacing = mSize.y / 30;
+
     // Render the sort name
-    mTexture->render((mSize.x - mUsableWidth - mTexture->getWidth()) / 2, mSize.y / 30);
+    mTexture->render((mSize.x - mUsableWidth - mTexture->getWidth()) / 2, spacing);
+
+    spacing += mTexture->getHeight() + mSize.y / 15;
 
     // Render the info text
-    mInfoTexture->render((mSize.x - mUsableWidth - mInfoTexture->getWidth()) / 2, mTexture->getHeight() + mSize.y / 15);
+    mInfoTexture->render((mSize.x - mUsableWidth - mInfoTexture->getWidth()) / 2, spacing);
+
+    spacing += mInfoTexture->getHeight() + mSize.y / 15;
 
     // Render the speed text
-    mSpeedTexture->render((mSize.x - mUsableWidth - mSpeedTexture->getWidth()) / 2, mInfoTexture->getHeight() + mTexture->getHeight() + mSize.y / 10);
+    mSpeedTexture->render((mSize.x - mUsableWidth - mSpeedTexture->getWidth()) / 2, spacing);
+
+    spacing += mSpeedTexture->getHeight() + mSize.y / 15;
+
+    // Update the swap text
+    std::stringstream swap_text;
+    swap_text << "Swaps: " << mSwapCount;
+    mSwapTexture->loadFromRenderedText(swap_text.str(), {0xFF, 0xFF, 0xFF, 0xFF}, true);
+    // Render the swap text
+    mSwapTexture->render((mSize.x - mUsableWidth - mSwapTexture->getWidth()) / 2, spacing);
 
     // Render the array
     draw_rects();
