@@ -11,6 +11,7 @@
 #include <ctime>
 #include <stdexcept>
 #include <numeric>
+#include <cmath>
 
 #include "Engine.hpp"
 
@@ -146,7 +147,7 @@ bool Visualizer::Engine::init(){
     }
 
     // Open the font used for the text
-    mFontSmall = TTF_OpenFont("../res/Roboto-Regular.ttf", 17);
+    mFontSmall = TTF_OpenFont("../res/Roboto-Regular.ttf", mSize.y / 35);
 
     // Check if the font was opened
     if(mFontSmall == NULL){
@@ -155,7 +156,7 @@ bool Visualizer::Engine::init(){
     }
 
     // Open the font used for the title text
-    mFontLarge = TTF_OpenFont("../res/Roboto-Regular.ttf", 24);
+    mFontLarge = TTF_OpenFont("../res/Roboto-Regular.ttf", mSize.y / 25);
 
     // Check if the font was opened
     if(mFontLarge == NULL){
@@ -195,6 +196,13 @@ void Visualizer::Engine::handleEvents(){
                 SDL_SetWindowSize(mWindow, mSize.x, mSize.y);
                 // Change usable area
                 mUsableWidth = mSize.x - (mSize.x / 4);
+                
+                // Resize the texture
+                mTexture->setFontSize(round(mSize.y / 25.0));
+                mTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], {0xFF, 0xFF, 0xFF, 0xFF});
+
+                mInfoTexture->setFontSize(round(mSize.y / 35.0));
+                mInfoTexture->loadFromRenderedText(gINFO_TEXT, {0xFF, 0xFF, 0xFF, 0xFF}, true);
             }
         }
         // User presses a key 

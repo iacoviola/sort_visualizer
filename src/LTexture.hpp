@@ -49,6 +49,9 @@ class LTexture
         int getWidth();
         int getHeight();
 
+        //Setters
+        void setFontSize(int size);
+
     private:
         //The actual hardware texture
         SDL_Texture* mTexture;
