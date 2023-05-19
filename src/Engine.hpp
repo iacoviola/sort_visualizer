@@ -11,6 +11,7 @@
 #include <vector>
 #include <string>
 #include <SDL2/SDL.h>
+#include <chrono>
 
 #include "Utilities.hpp"
 #include "LTexture.hpp"
@@ -62,6 +63,8 @@ namespace Visualizer
 
         int mCurrentDrawSpeed = 3; /*! The currently selected drawing speed */
 
+        int mSwapElement = -1; /*! The index of the element to be swapped */
+
         SORT_IDENTIFIER mCurrentSort = BUBBLE_SORT; /*! The currently selected sort algorithm */
 
         SDL_Renderer *mRenderer = NULL; /*! The main renderer */
@@ -72,16 +75,17 @@ namespace Visualizer
         LTexture *mSpeedTexture;       /*! The texture used to draw the speed text */
         LTexture *mSwapsTexture;       /*! The texture used to draw the swap count text */
         LTexture *mComparisonsTexture; /*! The texture used to draw the comparison count text */
+        LTexture *mTimeTexture;        /*! The texture used to draw the time text */
 
         TTF_Font *mRobotoSmall; /*! The font used to draw the text */
         TTF_Font *mRobotoLarge; /*! The font used to draw the text */
 
-        int mFontSizeSmall; /*! The size of the small font */
-        int mFontSizeLarge; /*! The size of the large font */
-
         int mUsableWidth; /*! The usable width of the window */
 
         std::vector<int> mNumbersArray; /*! The array to be sorted */
+
+        std::chrono::high_resolution_clock::time_point mStart; /*! The start time of the sort */
+        long long mElapsed = 0;
 
         /*!
          * @brief Initializes the engine
@@ -164,6 +168,11 @@ namespace Visualizer
          * @brief Sorts the array using insertion sort
          */
         void insertionSort();
+
+        /*!
+         * @brief Sorts the array using gnome sort
+         */
+        void gnomeSort();
 
         /*!
          * @brief Shuffles the array using the Fisher-Yates algorithm

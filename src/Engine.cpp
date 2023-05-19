@@ -149,11 +149,11 @@ bool Visualizer::Engine::init()
         return false;
     }
 
-    mFontSizeSmall = round(mWindowSize.y / 35.0);
-    mFontSizeLarge = round(mWindowSize.y / 25.0);
+    int fontSizeSmall = round(mWindowSize.y / 35.0);
+    int fontSizeLarge = round(mWindowSize.y / 25.0);
 
     // Open the font used for the text
-    mRobotoSmall = TTF_OpenFont("../res/Roboto-Regular.ttf", mFontSizeSmall);
+    mRobotoSmall = TTF_OpenFont("../res/Roboto-Regular.ttf", fontSizeSmall);
 
     // Check if the font was opened
     if (mRobotoSmall == NULL)
@@ -163,7 +163,7 @@ bool Visualizer::Engine::init()
     }
 
     // Open the font used for the title text
-    mRobotoLarge = TTF_OpenFont("../res/Roboto-Regular.ttf", mFontSizeLarge);
+    mRobotoLarge = TTF_OpenFont("../res/Roboto-Regular.ttf", fontSizeLarge);
 
     // Check if the font was opened
     if (mRobotoLarge == NULL)
@@ -193,6 +193,9 @@ bool Visualizer::Engine::init()
 
     // Create the texture used for the swap text
     mComparisonsTexture = new LTexture(mRenderer, mRobotoSmall);
+
+    // Create the texture used for the time text
+    mTimeTexture = new LTexture(mRenderer, mRobotoSmall);
 
     // Set background color
     SDL_SetRenderDrawColor(mRenderer, gBackgroundColor.r, gBackgroundColor.g, gBackgroundColor.b, gBackgroundColor.a);
@@ -224,24 +227,27 @@ void Visualizer::Engine::handleEvents()
                 // Change usable area
                 mUsableWidth = mWindowSize.x - (mWindowSize.x / 4);
 
+                int fontSizeSmall = round(mWindowSize.y / 35.0);
+                int fontSizeLarge = round(mWindowSize.y / 25.0);
+
                 // Resize the texture
-                mSortNameTexture->setFontSize(mFontSizeLarge);
+                mSortNameTexture->setFontSize(fontSizeLarge);
                 mSortNameTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], gFontColor);
 
-                mInfoPanelTexture->setFontSize(mFontSizeSmall);
+                mInfoPanelTexture->setFontSize(fontSizeSmall);
                 mInfoPanelTexture->loadFromRenderedText(gINFO_TEXT, gFontColor, true);
 
-                mSpeedTexture->setFontSize(mFontSizeSmall);
+                mSpeedTexture->setFontSize(fontSizeSmall);
                 std::stringstream speed_text;
                 speed_text << " Speed: " << gSPEEDS[mCurrentDrawSpeed] << "x";
                 mSpeedTexture->loadFromRenderedText(speed_text.str(), gFontColor, mInfoPanelTexture->getWidth());
 
-                mSwapsTexture->setFontSize(mFontSizeSmall);
+                mSwapsTexture->setFontSize(fontSizeSmall);
                 std::stringstream swap_text;
                 swap_text << " Swaps: " << mSwapsCount;
                 mSwapsTexture->loadFromRenderedText(swap_text.str(), gFontColor, mInfoPanelTexture->getWidth());
 
-                mComparisonsTexture->setFontSize(mFontSizeSmall);
+                mComparisonsTexture->setFontSize(fontSizeSmall);
                 std::stringstream compare_text;
                 compare_text << " Compare: " << mComparisonsCount;
                 mComparisonsTexture->loadFromRenderedText(compare_text.str(), gFontColor, mInfoPanelTexture->getWidth());
@@ -344,6 +350,17 @@ void Visualizer::Engine::handleEvents()
                     mSortNameTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], gFontColor);
                 }
                 break;
+            // User presses the G key
+            case SDLK_g:
+                // If the array is not sorted and if the current sort is not already gnome sort
+                if (!mRequestSort && mCurrentSort != GNOME_SORT)
+                {
+                    // Set the current sort to gnome sort
+                    mCurrentSort = GNOME_SORT;
+                    // Load the text for gnome sort
+                    mSortNameTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], gFontColor);
+                }
+                break;
             // User presses the SPACEBAR key
             case SDLK_SPACE:
                 // If the array is not sorted
@@ -396,6 +413,8 @@ void Visualizer::Engine::handleEvents()
 
 void Visualizer::Engine::sort()
 {
+    // Start the timer
+    mStart = std::chrono::high_resolution_clock::now();
     // Sorts the array based on the current sort selected
     switch (mCurrentSort)
     {
@@ -423,13 +442,22 @@ void Visualizer::Engine::sort()
     case INSERTION_SORT:
         insertionSort();
         break;
+    case GNOME_SORT:
+        gnomeSort();
+        break;
     }
+
+    // Stop the timer
+    auto end = std::chrono::high_resolution_clock::now();
+    mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
     // The array is sorted
     mIsSorted = true;
     // The request is stopped
     mRequestSort = false;
     // The fast forward flag is reset
     mIsFastForward = false;
+    // Reset the swap element
+    mSwapElement = -1;
 }
 
 void Visualizer::Engine::cocktailSort()
@@ -465,6 +493,8 @@ void Visualizer::Engine::cocktailSort()
                     {
                         return;
                     }
+                    auto end = std::chrono::high_resolution_clock::now();
+                    mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
                     draw();
                 }
                 swapped = true;
@@ -504,6 +534,8 @@ void Visualizer::Engine::cocktailSort()
                     {
                         return;
                     }
+                    auto end = std::chrono::high_resolution_clock::now();
+                    mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
                     draw();
                 }
                 swapped = true;
@@ -556,6 +588,9 @@ int Visualizer::Engine::partition(int low, int high)
             mSwapsCount++;
             if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
             {
+                mSwapElement = j;
+                auto end = std::chrono::high_resolution_clock::now();
+                mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
                 draw();
             }
         }
@@ -565,6 +600,9 @@ int Visualizer::Engine::partition(int low, int high)
     // If fast forward is enabled, draw the array on the screen immediately
     if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] && !mIsFastForward)
     {
+        mSwapElement = high;
+        auto end = std::chrono::high_resolution_clock::now();
+        mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
         draw();
     }
     return (i + 1);
@@ -592,6 +630,10 @@ void Visualizer::Engine::bubbleSort()
                     {
                         return;
                     }
+                    //update timer
+                    auto end = std::chrono::high_resolution_clock::now();
+                    mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
+                    mSwapElement = j + 1;
                     draw();
                 }
             }
@@ -641,6 +683,8 @@ void Visualizer::Engine::shellSort()
                     {
                         return;
                     }
+                    auto end = std::chrono::high_resolution_clock::now();
+                    mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
                     draw();
                 }
             }
@@ -656,6 +700,8 @@ void Visualizer::Engine::shellSort()
                 {
                     return;
                 }
+                auto end = std::chrono::high_resolution_clock::now();
+                mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
                 draw();
             }
         }
@@ -698,6 +744,8 @@ void Visualizer::Engine::heapify(int n, int i)
             {
                 return;
             }
+            auto end = std::chrono::high_resolution_clock::now();
+            mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
             draw();
         }
 
@@ -734,6 +782,8 @@ void Visualizer::Engine::heapSort()
             {
                 return;
             }
+            auto end = std::chrono::high_resolution_clock::now();
+            mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
             draw();
         }
 
@@ -784,6 +834,8 @@ void Visualizer::Engine::merge(int left, int mid, int right)
             {
                 return;
             }
+            auto end = std::chrono::high_resolution_clock::now();
+            mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
             draw();
         }
         if (leftArray[indexOfSubArrayOne] <= rightArray[indexOfSubArrayTwo])
@@ -814,6 +866,8 @@ void Visualizer::Engine::merge(int left, int mid, int right)
             {
                 return;
             }
+            auto end = std::chrono::high_resolution_clock::now();
+            mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
             draw();
         }
 
@@ -836,6 +890,8 @@ void Visualizer::Engine::merge(int left, int mid, int right)
             {
                 return;
             }
+            auto end = std::chrono::high_resolution_clock::now();
+            mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
             draw();
         }
 
@@ -875,6 +931,8 @@ void Visualizer::Engine::selectionSort()
                     {
                         return;
                     }
+                    auto end = std::chrono::high_resolution_clock::now();
+                    mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
                     draw();
                 }
             }
@@ -895,6 +953,8 @@ void Visualizer::Engine::selectionSort()
                 {
                     return;
                 }
+                auto end = std::chrono::high_resolution_clock::now();
+                mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
                 draw();
             }
         }
@@ -929,10 +989,41 @@ void Visualizer::Engine::insertionSort()
                 {
                     return;
                 }
+                auto end = std::chrono::high_resolution_clock::now();
+                mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
                 draw();
             }
         }
         mNumbersArray[j + 1] = key;
+    }
+}
+
+void Visualizer::Engine::gnomeSort(){
+    int index = 0;
+
+    while (index < mMAX_ELEMENTS) {
+        if (index == 0)
+            index++;
+        if (mNumbersArray[index] >= mNumbersArray[index - 1])
+            index++;
+        else {
+            std::swap(mNumbersArray[index], mNumbersArray[index - 1]);
+            index--;
+            mSwapsCount++;
+            if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
+            {
+                // Handle events every few iterations
+                handleEvents();
+                if (!mIsRunning)
+                {
+                    return;
+                }
+                auto end = std::chrono::high_resolution_clock::now();
+                mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
+                mSwapElement = index - 1;
+                draw();
+            }
+        }
     }
 }
 
@@ -993,12 +1084,21 @@ void Visualizer::Engine::draw()
 
     spacing += mSwapsTexture->getHeight();
 
-    // Update the swap text
+    // Update the comparisons text
     std::stringstream compare_text;
     compare_text << " Compare: " << mComparisonsCount;
     mComparisonsTexture->loadFromRenderedText(compare_text.str(), gFontColor, mInfoPanelTexture->getWidth());
-    // Render the swap text
+    // Render the comparisons text
     mComparisonsTexture->render((mWindowSize.x - mUsableWidth - mInfoPanelTexture->getWidth()) / 2, spacing);
+
+    spacing += mComparisonsTexture->getHeight();
+
+    // Update the time text
+    std::stringstream time_text;
+    time_text << " Time: " << mElapsed / 1000.0 << "s";
+    mTimeTexture->loadFromRenderedText(time_text.str(), gFontColor, mInfoPanelTexture->getWidth());
+    // Render the time text
+    mTimeTexture->render((mWindowSize.x - mUsableWidth - mInfoPanelTexture->getWidth()) / 2, spacing);
 
     // Render the array
     draw_rects();
@@ -1029,8 +1129,11 @@ void Visualizer::Engine::draw_rects()
     // Draw the rectangles
     for (int i = 0; i < mMAX_ELEMENTS; i++)
     {
-        // Set the color of each rectangle
-        SDL_SetRenderDrawColor(mRenderer, startColorR + colorStepR * mNumbersArray[i], startColorG + colorStepG * mNumbersArray[i], startColorB + colorStepB * mNumbersArray[i], 0xFF);
+        // Set the color of each rectangle (red if it's the element being swapped)
+        if(mSwapElement == i)
+            SDL_SetRenderDrawColor(mRenderer, 0xFF, 0x00, 0x00, 0xFF);
+        else  
+            SDL_SetRenderDrawColor(mRenderer, startColorR + colorStepR * mNumbersArray[i], startColorG + colorStepG * mNumbersArray[i], startColorB + colorStepB * mNumbersArray[i], 0xFF);
         // Set the width of the rectangle to the width of the window divided by the number of elements in the array
         rect.w = (float)mUsableWidth / mMAX_ELEMENTS;
         // Set the height of the rectangle

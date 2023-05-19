@@ -31,7 +31,8 @@ enum SORT_IDENTIFIER
     HEAP_SORT,
     MERGE_SORT,
     SELECTION_SORT,
-    INSERTION_SORT
+    INSERTION_SORT,
+    GNOME_SORT
 };
 
 // Strings used to represent the sorting algorithms
@@ -43,11 +44,12 @@ const std::string gSORT_NAMES[] = {
     "Heap Sort",
     "Merge Sort",
     "Selection Sort",
-    "Insertion Sort"
+    "Insertion Sort",
+    "Gnome Sort"
 };
 
 // String used for the info text
-const std::string gINFO_TEXT = " B - bubble sort \n E - shell sort \n Q - quick sort \n H - heap sort \n C - cocktail sort \n M - merge sort \n L - selection sort \n I - insertion sort \n ------- \n Spacebar - start/ff \n S - shuffle \n ESC - quit \n ------- \n";
+const std::string gINFO_TEXT = " B - bubble sort \n E - shell sort \n Q - quick sort \n H - heap sort \n C - cocktail sort \n M - merge sort \n L - selection sort \n I - insertion sort \n G - gnome sort \n ------- \n Spacebar - start/ff \n S - shuffle \n ESC - quit \n ------- \n";
 // Save the different speeds
 const int gSPEEDS[] = {1, 5, 10, 20, 50, 100};
 
