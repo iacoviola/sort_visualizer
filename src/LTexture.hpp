@@ -1,8 +1,8 @@
 //
 //  LTexture.hpp
-//  SDL_Keying
+//  SDL_Sort_Visualizer
 //
-//  Created by Emiliano Iacopini on 3/12/23.
+//  Created by Emiliano Iacopini on 5/16/23.
 //
 
 #ifndef LTexture_hpp
@@ -12,55 +12,60 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
-//Texture wrapper class
+// Texture wrapper class
 class LTexture
 {
-    public:
-        //Initializes variables
-        LTexture(SDL_Renderer* renderer);
-        //Initializes variables
-        LTexture(SDL_Renderer* renderer, TTF_Font* font = NULL);
+public:
+    // Initializes variables
+    LTexture(SDL_Renderer *renderer);
+    // Initializes variables
+    LTexture(SDL_Renderer *renderer, TTF_Font *font = NULL);
 
-        //Deallocates memory
-        ~LTexture();
+    // Deallocates memory
+    ~LTexture();
 
-        //Loads image at specified path
-        bool loadFromFile(std::string path);
+#if defined(SDL_IMAGE_H_)
+    // Loads image at specified path
+    bool loadFromFile(std::string path);
+#endif
 
-        //Creates image from font string
-        bool loadFromRenderedText(std::string textureText, SDL_Color textColor, bool wrappable = false);
+    // Creates image from font string
+    bool loadFromRenderedText(std::string textureText, SDL_Color textColor, bool wrappable = false);
 
-        //Deallocates texture
-        void free();
+    // Creates image from font string
+    bool loadFromRenderedText(std::string textureText, SDL_Color textColor, int width);
 
-        //Renders texture at given point
-        void render(int x, int y, SDL_Rect* clip = NULL, double angle = 0.0, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE);
-	
-        //set color modulation
-        void setColor(Uint8 red, Uint8 green, Uint8 blue);
+    // Deallocates texture
+    void free();
 
-        //set blending
-        void setBlendMode(SDL_BlendMode blending);
+    // Renders texture at given point
+    void render(int x, int y, SDL_Rect *clip = NULL, double angle = 0.0, SDL_Point *center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE);
 
-        //set alpha modulation
-        void setAlpha(Uint8 alpha);
+    // set color modulation
+    void setColor(Uint8 red, Uint8 green, Uint8 blue);
 
-        //Gets image dimensions
-        int getWidth();
-        int getHeight();
+    // set blending
+    void setBlendMode(SDL_BlendMode blending);
 
-        //Setters
-        void setFontSize(int size);
+    // set alpha modulation
+    void setAlpha(Uint8 alpha);
 
-    private:
-        //The actual hardware texture
-        SDL_Texture* mTexture;
-        SDL_Renderer* renderer;
-        TTF_Font* font;
+    // Gets image dimensions
+    int getWidth();
+    int getHeight();
 
-        //Image dimensions
-        int mWidth;
-        int mHeight;
+    // Setters
+    void setFontSize(int size);
+
+private:
+    // The actual hardware texture
+    SDL_Texture *mTexture;
+    SDL_Renderer *renderer;
+    TTF_Font *font;
+
+    // Image dimensions
+    int mWidth;
+    int mHeight;
 };
 
 #endif /* LTexture_hpp */

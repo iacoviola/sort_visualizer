@@ -11,17 +11,19 @@
 #include <string>
 
 /*!
-* @brief A struct that represents a couple of integers used to represent the size of the window
-*/
-typedef struct COUPLE {
+ * @brief A struct that represents a couple of integers used to represent the size of the window
+ */
+typedef struct COUPLE
+{
     int x;
     int y;
 } COUPLE;
 
 /*!
-* @brief Enum that represents the sorting algorithms available
-*/
-enum SORT_IDENTIFIER {
+ * @brief Enum that represents the sorting algorithms available
+ */
+enum SORT_IDENTIFIER
+{
     BUBBLE_SORT,
     QUICK_SORT,
     COCKTAIL_SORT,
@@ -45,8 +47,12 @@ const std::string gSORT_NAMES[] = {
 };
 
 // String used for the info text
-const std::string gINFO_TEXT = " B - bubble sort \n E - shell sort \n Q - quick sort \n H - heap sort \n C - cocktail sort \n M - merge sort \n L - selection sort \n I - insertion sort \n ------- \n Spacebar - start/ff \n S - shuffle ";
+const std::string gINFO_TEXT = " B - bubble sort \n E - shell sort \n Q - quick sort \n H - heap sort \n C - cocktail sort \n M - merge sort \n L - selection sort \n I - insertion sort \n ------- \n Spacebar - start/ff \n S - shuffle \n ESC - quit \n ------- \n";
 // Save the different speeds
-const int gSPEEDS[] = { 1, 5, 10, 20, 50, 100 };
+const int gSPEEDS[] = {1, 5, 10, 20, 50, 100};
+
+const SDL_Color gBackgroundColor = {0x4a, 0x18, 0xa8, 0xFF}; /*! The background color of the window */
+
+const SDL_Color gFontColor = {0xFF, 0xFF, 0xFF, 0xFF}; /*! The font color of the text */
 
 #endif /* Utilities_hpp */

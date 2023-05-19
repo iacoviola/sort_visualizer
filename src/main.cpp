@@ -11,11 +11,15 @@
 
 #include "Engine.hpp"
 
-int main(int argc, char * argv[]) {
-    try {
+int main(int argc, char *argv[])
+{
+    try
+    {
         Visualizer::Engine engine({800, 600}, 400, "SDL Sort Visualizer");
         engine.run();
-    } catch (std::runtime_error &e) {
+    }
+    catch (std::runtime_error &e)
+    {
         printf("%s\n", e.what());
         return -1;
     }
