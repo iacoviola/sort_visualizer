@@ -15,8 +15,8 @@
 
 #include "Engine.hpp"
 
-Visualizer::Engine::Engine(const COUPLE size, const int max_elements)
-    : mWindowSize(size), mMAX_ELEMENTS(max_elements), mUsableWidth(size.x - (size.x / 4)), mNumbersArray(max_elements)
+Visualizer::Engine::Engine(const COUPLE size)
+    : mWindowSize(size), mUsableWidth(size.x - (size.x / 4)), mNumbersArray(gMAX_ELEMENTS[mCurrentElementsNumber])
 {
 
     // Initialize the engine
@@ -25,17 +25,17 @@ Visualizer::Engine::Engine(const COUPLE size, const int max_elements)
         throw std::runtime_error("Failed to initialize!");
     }
 
-    // Fill the array with numbers from 1 to mMAX_ELEMENTS
+    // Fill the array with numbers from 1 to gMAX_ELEMENTS[mCurrentElementsNumber]
     std::iota(mNumbersArray.begin(), mNumbersArray.end(), 1);
 
-    // Fill the array with numbers from 1 to mMAX_ELEMENTS
+    // Fill the array with numbers from 1 to gMAX_ELEMENTS[mCurrentElementsNumber]
     // fill_array();
     // Shuffle the array
     shuffle();
 }
 
-Visualizer::Engine::Engine(const COUPLE size, const int max_elements, const char *window_title)
-    : mWindowSize(size), mMAX_ELEMENTS(max_elements), mWindowTitle(window_title), mUsableWidth(size.x - (size.x / 4)), mNumbersArray(max_elements)
+Visualizer::Engine::Engine(const COUPLE size, const char *window_title)
+    : mWindowSize(size), mWindowTitle(window_title), mUsableWidth(size.x - (size.x / 4)), mNumbersArray(gMAX_ELEMENTS[mCurrentElementsNumber])
 {
 
     // Initialize the engine
@@ -44,10 +44,10 @@ Visualizer::Engine::Engine(const COUPLE size, const int max_elements, const char
         throw std::runtime_error("Failed to initialize!");
     }
 
-    // Fill the array with numbers from 1 to mMAX_ELEMENTS
+    // Fill the array with numbers from 1 to gMAX_ELEMENTS[mCurrentElementsNumber]
     std::iota(mNumbersArray.begin(), mNumbersArray.end(), 1);
 
-    // Fill the array with numbers from 1 to mMAX_ELEMENTS
+    // Fill the array with numbers from 1 to gMAX_ELEMENTS[mCurrentElementsNumber]
     // fill_array();
     // Shuffle the array
     shuffle();
@@ -185,7 +185,7 @@ bool Visualizer::Engine::init()
     mSpeedTexture = new LTexture(mRenderer, mRobotoSmall);
     // Load the speed text
     std::stringstream speed_text;
-    speed_text << " Speed: " << gSPEEDS[mCurrentDrawSpeed] << "x";
+    speed_text << " Speed: " << gSPEEDS[mCurrentDrawSpeed] << "x UP/DN";
     mSpeedTexture->loadFromRenderedText(speed_text.str(), gFontColor, mInfoPanelTexture->getWidth());
 
     // Create the texture used for the swap text
@@ -196,6 +196,13 @@ bool Visualizer::Engine::init()
 
     // Create the texture used for the time text
     mTimeTexture = new LTexture(mRenderer, mRobotoSmall);
+
+    // Create the texture used for the element number text
+    mElementNumberTexture = new LTexture(mRenderer, mRobotoSmall);
+    // Load the element number text
+    std::stringstream element_number_text;
+    element_number_text << " Elements: " << gMAX_ELEMENTS[mCurrentElementsNumber] << " J/K";
+    mElementNumberTexture->loadFromRenderedText(element_number_text.str(), gFontColor, mInfoPanelTexture->getWidth());
 
     // Set background color
     SDL_SetRenderDrawColor(mRenderer, gBackgroundColor.r, gBackgroundColor.g, gBackgroundColor.b, gBackgroundColor.a);
@@ -239,8 +246,13 @@ void Visualizer::Engine::handleEvents()
 
                 mSpeedTexture->setFontSize(fontSizeSmall);
                 std::stringstream speed_text;
-                speed_text << " Speed: " << gSPEEDS[mCurrentDrawSpeed] << "x";
+                speed_text << " Speed: " << gSPEEDS[mCurrentDrawSpeed] << "x UP/DN";
                 mSpeedTexture->loadFromRenderedText(speed_text.str(), gFontColor, mInfoPanelTexture->getWidth());
+
+                mElementNumberTexture->setFontSize(fontSizeSmall);
+                std::stringstream elements_text;
+                elements_text << " Elements: " << gMAX_ELEMENTS[mCurrentElementsNumber] << "J/K";
+                mElementNumberTexture->loadFromRenderedText(elements_text.str(), gFontColor, mInfoPanelTexture->getWidth());
 
                 mSwapsTexture->setFontSize(fontSizeSmall);
                 std::stringstream swap_text;
@@ -251,6 +263,11 @@ void Visualizer::Engine::handleEvents()
                 std::stringstream compare_text;
                 compare_text << " Compare: " << mComparisonsCount;
                 mComparisonsTexture->loadFromRenderedText(compare_text.str(), gFontColor, mInfoPanelTexture->getWidth());
+
+                mTimeTexture->setFontSize(fontSizeSmall);
+                std::stringstream time_text;
+                time_text << " Time: " << mElapsed << "ms";
+                mTimeTexture->loadFromRenderedText(time_text.str(), gFontColor, mInfoPanelTexture->getWidth());
             }
         }
         // User presses a key
@@ -391,7 +408,7 @@ void Visualizer::Engine::handleEvents()
                     // Decreases the speed
                     mCurrentDrawSpeed--;
                     std::stringstream ss;
-                    ss << " Speed: " << gSPEEDS[mCurrentDrawSpeed] << "x";
+                    ss << " Speed: " << gSPEEDS[mCurrentDrawSpeed] << "x UP/DN";
                     mSpeedTexture->loadFromRenderedText(ss.str(), gFontColor, mInfoPanelTexture->getWidth());
                 }
                 break;
@@ -402,8 +419,36 @@ void Visualizer::Engine::handleEvents()
                     // Decreases the speed
                     mCurrentDrawSpeed++;
                     std::stringstream ss;
-                    ss << " Speed: " << gSPEEDS[mCurrentDrawSpeed] << "x";
+                    ss << " Speed: " << gSPEEDS[mCurrentDrawSpeed] << "x UP/DN";
                     mSpeedTexture->loadFromRenderedText(ss.str(), gFontColor, mInfoPanelTexture->getWidth());
+                }
+                break;
+            // User presses the J key
+            case SDLK_j:
+                if (mCurrentElementsNumber > 0 && !mRequestSort)
+                {
+                    // Decreases the speed
+                    mCurrentElementsNumber--;
+                    std::stringstream en;
+                    en << " Elements: " << gMAX_ELEMENTS[mCurrentElementsNumber] << " J/K";
+                    mElementNumberTexture->loadFromRenderedText(en.str(), gFontColor, mInfoPanelTexture->getWidth());
+                    mNumbersArray.resize(gMAX_ELEMENTS[mCurrentElementsNumber]);
+                    std::iota(mNumbersArray.begin(), mNumbersArray.end(), 1);
+                    shuffle();
+                }
+                break;
+            // User presses the K key
+            case SDLK_k:
+                if (mCurrentElementsNumber < 8 && !mRequestSort)
+                {
+                    // Decreases the speed
+                    mCurrentElementsNumber++;
+                    std::stringstream en;
+                    en << " Elements: " << gMAX_ELEMENTS[mCurrentElementsNumber] << " J/K";
+                    mElementNumberTexture->loadFromRenderedText(en.str(), gFontColor, mInfoPanelTexture->getWidth());
+                    mNumbersArray.resize(gMAX_ELEMENTS[mCurrentElementsNumber]);
+                    std::iota(mNumbersArray.begin(), mNumbersArray.end(), 1);
+                    shuffle();
                 }
                 break;
             }
@@ -422,7 +467,7 @@ void Visualizer::Engine::sort()
         bubbleSort();
         break;
     case QUICK_SORT:
-        quickSort(0, mMAX_ELEMENTS - 1);
+        quickSort(0, gMAX_ELEMENTS[mCurrentElementsNumber] - 1);
         break;
     case COCKTAIL_SORT:
         cocktailSort();
@@ -434,7 +479,7 @@ void Visualizer::Engine::sort()
         heapSort();
         break;
     case MERGE_SORT:
-        mergeSort(0, mMAX_ELEMENTS - 1);
+        mergeSort(0, gMAX_ELEMENTS[mCurrentElementsNumber] - 1);
         break;
     case SELECTION_SORT:
         selectionSort();
@@ -454,8 +499,6 @@ void Visualizer::Engine::sort()
     mIsSorted = true;
     // The request is stopped
     mRequestSort = false;
-    // The fast forward flag is reset
-    mIsFastForward = false;
     // Reset the swap element
     mSwapElement = -1;
 }
@@ -464,7 +507,7 @@ void Visualizer::Engine::cocktailSort()
 {
     bool swapped = true;
     int start = 0;
-    int end = mMAX_ELEMENTS - 1;
+    int end = gMAX_ELEMENTS[mCurrentElementsNumber] - 1;
 
     while (swapped)
     {
@@ -589,8 +632,6 @@ int Visualizer::Engine::partition(int low, int high)
             if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
             {
                 mSwapElement = j;
-                auto end = std::chrono::high_resolution_clock::now();
-                mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
                 draw();
             }
         }
@@ -601,8 +642,6 @@ int Visualizer::Engine::partition(int low, int high)
     if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] && !mIsFastForward)
     {
         mSwapElement = high;
-        auto end = std::chrono::high_resolution_clock::now();
-        mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
         draw();
     }
     return (i + 1);
@@ -611,10 +650,10 @@ int Visualizer::Engine::partition(int low, int high)
 void Visualizer::Engine::bubbleSort()
 {
     bool swapped;
-    for (int i = 0; i < mMAX_ELEMENTS - 1; i++)
+    for (int i = 0; i < gMAX_ELEMENTS[mCurrentElementsNumber] - 1; i++)
     {
         swapped = false;
-        for (int j = 0; j < mMAX_ELEMENTS - i - 1; j++)
+        for (int j = 0; j < gMAX_ELEMENTS[mCurrentElementsNumber] - i - 1; j++)
         {
             mComparisonsCount++;
             if (mNumbersArray[j] > mNumbersArray[j + 1])
@@ -630,9 +669,6 @@ void Visualizer::Engine::bubbleSort()
                     {
                         return;
                     }
-                    //update timer
-                    auto end = std::chrono::high_resolution_clock::now();
-                    mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
                     mSwapElement = j + 1;
                     draw();
                 }
@@ -650,7 +686,7 @@ void Visualizer::Engine::bubbleSort()
 void Visualizer::Engine::shellSort()
 {
     // Start with a big gap, then reduce the gap
-    for (int gap = mMAX_ELEMENTS / 2; gap > 0; gap /= 2)
+    for (int gap = gMAX_ELEMENTS[mCurrentElementsNumber] / 2; gap > 0; gap /= 2)
     {
         /*
          * Do a gapped insertion sort for this gap size.
@@ -658,7 +694,7 @@ void Visualizer::Engine::shellSort()
          * keep adding one more element until the entire array is
          * gap sorted
          */
-        for (int i = gap; i < mMAX_ELEMENTS; i += 1)
+        for (int i = gap; i < gMAX_ELEMENTS[mCurrentElementsNumber]; i += 1)
         {
             /*
              * Add a[i] to the elements that have been gap sorted
@@ -760,14 +796,14 @@ void Visualizer::Engine::heapify(int n, int i)
 void Visualizer::Engine::heapSort()
 {
     // Build heap (rearrange array)
-    for (int i = mMAX_ELEMENTS / 2 - 1; i >= 0; i--)
-        heapify(mMAX_ELEMENTS, i);
+    for (int i = gMAX_ELEMENTS[mCurrentElementsNumber] / 2 - 1; i >= 0; i--)
+        heapify(gMAX_ELEMENTS[mCurrentElementsNumber], i);
 
     /*
      * One by one extract an element
      * from heap
      */
-    for (int i = mMAX_ELEMENTS - 1; i > 0; i--)
+    for (int i = gMAX_ELEMENTS[mCurrentElementsNumber] - 1; i > 0; i--)
     {
 
         // Move current root to end
@@ -909,14 +945,14 @@ void Visualizer::Engine::selectionSort()
      * One by one move boundary of
      * unsorted subarray
      */
-    for (i = 0; i < mMAX_ELEMENTS - 1; i++)
+    for (i = 0; i < gMAX_ELEMENTS[mCurrentElementsNumber] - 1; i++)
     {
         /*
          * Find the minimum element in
          * unsorted array
          */
         min_idx = i;
-        for (j = i + 1; j < mMAX_ELEMENTS; j++)
+        for (j = i + 1; j < gMAX_ELEMENTS[mCurrentElementsNumber]; j++)
         {
 
             if (mNumbersArray[j] < mNumbersArray[min_idx])
@@ -964,7 +1000,7 @@ void Visualizer::Engine::selectionSort()
 void Visualizer::Engine::insertionSort()
 {
     int i, key, j;
-    for (i = 1; i < mMAX_ELEMENTS; i++)
+    for (i = 1; i < gMAX_ELEMENTS[mCurrentElementsNumber]; i++)
     {
         key = mNumbersArray[i];
         j = i - 1;
@@ -1001,7 +1037,7 @@ void Visualizer::Engine::insertionSort()
 void Visualizer::Engine::gnomeSort(){
     int index = 0;
 
-    while (index < mMAX_ELEMENTS) {
+    while (index < gMAX_ELEMENTS[mCurrentElementsNumber]) {
         if (index == 0)
             index++;
         if (mNumbersArray[index] >= mNumbersArray[index - 1])
@@ -1032,12 +1068,12 @@ void Visualizer::Engine::shuffle()
     // Shuffle the array
     srand(time(NULL));
 
-    for (int i = 0; i < mMAX_ELEMENTS; i++)
+    for (int i = 0; i < gMAX_ELEMENTS[mCurrentElementsNumber]; i++)
     {
-        int random = rand() % mMAX_ELEMENTS;
+        int random = rand() % gMAX_ELEMENTS[mCurrentElementsNumber];
         std::swap(mNumbersArray[i], mNumbersArray[random]);
         // Draw the array every 10% of the way through the shuffle
-        if (i % (mMAX_ELEMENTS / 10) == 0)
+        if (i % (gMAX_ELEMENTS[mCurrentElementsNumber] / 10) == 0)
             draw();
     }
 
@@ -1051,6 +1087,10 @@ void Visualizer::Engine::shuffle()
     mSwapsCount = 0;
     // Reset the comparisons count
     mComparisonsCount = 0;
+    // The fast forward flag is reset
+    mIsFastForward = false;
+    // Set time to 0
+    mElapsed = 0.000;
 }
 
 void Visualizer::Engine::draw()
@@ -1075,6 +1115,11 @@ void Visualizer::Engine::draw()
 
     spacing += mSpeedTexture->getHeight();
 
+    // Render the elements number text
+    mElementNumberTexture->render((mWindowSize.x - mUsableWidth - mInfoPanelTexture->getWidth()) / 2, spacing);
+
+    spacing += mElementNumberTexture->getHeight();
+
     // Update the swap text
     std::stringstream swap_text;
     swap_text << " Swaps: " << mSwapsCount;
@@ -1091,11 +1136,22 @@ void Visualizer::Engine::draw()
     // Render the comparisons text
     mComparisonsTexture->render((mWindowSize.x - mUsableWidth - mInfoPanelTexture->getWidth()) / 2, spacing);
 
-    spacing += mComparisonsTexture->getHeight();
+    spacing += mElementNumberTexture->getHeight();
+
+    // Update time
+    if(mRequestSort)
+    {
+        auto end = std::chrono::high_resolution_clock::now();
+        mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
+    }
 
     // Update the time text
     std::stringstream time_text;
-    time_text << " Time: " << mElapsed / 1000.0 << "s";
+    if(!mIsFastForward)
+        time_text << " Time: " << mElapsed / 1000.0 << "s";
+    else
+        time_text << " Time: " << "Skipped";
+
     mTimeTexture->loadFromRenderedText(time_text.str(), gFontColor, mInfoPanelTexture->getWidth());
     // Render the time text
     mTimeTexture->render((mWindowSize.x - mUsableWidth - mInfoPanelTexture->getWidth()) / 2, spacing);
@@ -1122,12 +1178,12 @@ void Visualizer::Engine::draw_rects()
     int endColorB = 0xe0;
 
     // Calculate the color step
-    double colorStepR = (endColorR - startColorR) / (double)mMAX_ELEMENTS;
-    double colorStepG = (endColorG - startColorG) / (double)mMAX_ELEMENTS;
-    double colorStepB = (endColorB - startColorB) / (double)mMAX_ELEMENTS;
+    double colorStepR = (endColorR - startColorR) / (double)gMAX_ELEMENTS[mCurrentElementsNumber];
+    double colorStepG = (endColorG - startColorG) / (double)gMAX_ELEMENTS[mCurrentElementsNumber];
+    double colorStepB = (endColorB - startColorB) / (double)gMAX_ELEMENTS[mCurrentElementsNumber];
 
     // Draw the rectangles
-    for (int i = 0; i < mMAX_ELEMENTS; i++)
+    for (int i = 0; i < gMAX_ELEMENTS[mCurrentElementsNumber]; i++)
     {
         // Set the color of each rectangle (red if it's the element being swapped)
         if(mSwapElement == i)
@@ -1135,9 +1191,9 @@ void Visualizer::Engine::draw_rects()
         else  
             SDL_SetRenderDrawColor(mRenderer, startColorR + colorStepR * mNumbersArray[i], startColorG + colorStepG * mNumbersArray[i], startColorB + colorStepB * mNumbersArray[i], 0xFF);
         // Set the width of the rectangle to the width of the window divided by the number of elements in the array
-        rect.w = (float)mUsableWidth / mMAX_ELEMENTS;
+        rect.w = (float)mUsableWidth / gMAX_ELEMENTS[mCurrentElementsNumber];
         // Set the height of the rectangle
-        rect.h = ((float)mWindowSize.y / mMAX_ELEMENTS) * mNumbersArray[i];
+        rect.h = ((float)mWindowSize.y / gMAX_ELEMENTS[mCurrentElementsNumber]) * mNumbersArray[i];
         // Set the x coordinate by multiplying the index by the width of the rectangle
         rect.x = i * rect.w + (mWindowSize.x - mUsableWidth);
         // Set the y coordinate by subtracting the height of the rectangle from the height of the window
