@@ -536,8 +536,6 @@ void Visualizer::Engine::cocktailSort()
                     {
                         return;
                     }
-                    auto end = std::chrono::high_resolution_clock::now();
-                    mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
                     draw();
                 }
                 swapped = true;
@@ -577,8 +575,6 @@ void Visualizer::Engine::cocktailSort()
                     {
                         return;
                     }
-                    auto end = std::chrono::high_resolution_clock::now();
-                    mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
                     draw();
                 }
                 swapped = true;
@@ -719,8 +715,6 @@ void Visualizer::Engine::shellSort()
                     {
                         return;
                     }
-                    auto end = std::chrono::high_resolution_clock::now();
-                    mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
                     draw();
                 }
             }
@@ -736,8 +730,6 @@ void Visualizer::Engine::shellSort()
                 {
                     return;
                 }
-                auto end = std::chrono::high_resolution_clock::now();
-                mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
                 draw();
             }
         }
@@ -780,8 +772,6 @@ void Visualizer::Engine::heapify(int n, int i)
             {
                 return;
             }
-            auto end = std::chrono::high_resolution_clock::now();
-            mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
             draw();
         }
 
@@ -818,8 +808,6 @@ void Visualizer::Engine::heapSort()
             {
                 return;
             }
-            auto end = std::chrono::high_resolution_clock::now();
-            mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
             draw();
         }
 
@@ -870,8 +858,6 @@ void Visualizer::Engine::merge(int left, int mid, int right)
             {
                 return;
             }
-            auto end = std::chrono::high_resolution_clock::now();
-            mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
             draw();
         }
         if (leftArray[indexOfSubArrayOne] <= rightArray[indexOfSubArrayTwo])
@@ -902,8 +888,6 @@ void Visualizer::Engine::merge(int left, int mid, int right)
             {
                 return;
             }
-            auto end = std::chrono::high_resolution_clock::now();
-            mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
             draw();
         }
 
@@ -926,8 +910,6 @@ void Visualizer::Engine::merge(int left, int mid, int right)
             {
                 return;
             }
-            auto end = std::chrono::high_resolution_clock::now();
-            mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
             draw();
         }
 
@@ -967,8 +949,6 @@ void Visualizer::Engine::selectionSort()
                     {
                         return;
                     }
-                    auto end = std::chrono::high_resolution_clock::now();
-                    mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
                     draw();
                 }
             }
@@ -989,8 +969,6 @@ void Visualizer::Engine::selectionSort()
                 {
                     return;
                 }
-                auto end = std::chrono::high_resolution_clock::now();
-                mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
                 draw();
             }
         }
@@ -1025,8 +1003,6 @@ void Visualizer::Engine::insertionSort()
                 {
                     return;
                 }
-                auto end = std::chrono::high_resolution_clock::now();
-                mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
                 draw();
             }
         }
@@ -1054,8 +1030,6 @@ void Visualizer::Engine::gnomeSort(){
                 {
                     return;
                 }
-                auto end = std::chrono::high_resolution_clock::now();
-                mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
                 mSwapElement = index - 1;
                 draw();
             }
