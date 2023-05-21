@@ -76,6 +76,7 @@ namespace Visualizer
         LTexture *mSwapsTexture;       /*! The texture used to draw the swap count text */
         LTexture *mComparisonsTexture; /*! The texture used to draw the comparison count text */
         LTexture *mTimeTexture;        /*! The texture used to draw the time text */
+        LTexture *mRealTimeTexture;    /*! The texture used to draw the real time text */
         LTexture *mElementNumberTexture; /*! The texture used to draw the number of elements text */
 
         TTF_Font *mRobotoSmall; /*! The font used to draw the text */
@@ -86,7 +87,10 @@ namespace Visualizer
         std::vector<int> mNumbersArray; /*! The array to be sorted */
 
         std::chrono::high_resolution_clock::time_point mStart; /*! The start time of the sort */
+        std::chrono::high_resolution_clock::time_point mDrawStart; /*! The start time of the sort */
         long long mElapsed = 0;
+        std::chrono::nanoseconds mElapsedNano = std::chrono::nanoseconds(0); /*! The time taken to sort the array */
+        std::chrono::nanoseconds mDrawsTime = std::chrono::nanoseconds(0); /*! The time taken to draw the array */
 
         /*!
          * @brief Initializes the engine

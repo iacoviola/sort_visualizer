@@ -12,6 +12,7 @@
 #include <numeric>
 #include <cmath>
 #include <sstream>
+#include <iomanip>
 
 #include "Engine.hpp"
 
@@ -197,6 +198,9 @@ bool Visualizer::Engine::init()
     // Create the texture used for the time text
     mTimeTexture = new LTexture(mRenderer, mRobotoSmall);
 
+    // Create the texture used for the time text
+    mRealTimeTexture = new LTexture(mRenderer, mRobotoSmall);
+
     // Create the texture used for the element number text
     mElementNumberTexture = new LTexture(mRenderer, mRobotoSmall);
     // Load the element number text
@@ -268,6 +272,11 @@ void Visualizer::Engine::handleEvents()
                 std::stringstream time_text;
                 time_text << " Time: " << mElapsed << "ms";
                 mTimeTexture->loadFromRenderedText(time_text.str(), gFontColor, false, mInfoPanelTexture->getWidth());
+                
+                time_text.str("");
+                mRealTimeTexture->setFontSize(fontSizeSmall);
+                time_text << " Real Time: " << 0 << "ms";
+                mRealTimeTexture->loadFromRenderedText(time_text.str(), gFontColor, false, mInfoPanelTexture->getWidth());
             }
         }
         // User presses a key
@@ -502,7 +511,8 @@ void Visualizer::Engine::sort()
 
     // Stop the timer
     auto end = std::chrono::high_resolution_clock::now();
-    mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
+    mElapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - mStart).count();
+    mElapsedNano = std::chrono::nanoseconds(end - mStart);
     // The array is sorted
     mIsSorted = true;
     // The request is stopped
@@ -668,6 +678,9 @@ void Visualizer::Engine::bubbleSort()
             {
                 std::swap(mNumbersArray[j], mNumbersArray[j + 1]);
                 swapped = true;
+
+                mDrawStart = std::chrono::high_resolution_clock::now();
+                
                 mSwapsCount++;
                 if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
                 {
@@ -680,6 +693,8 @@ void Visualizer::Engine::bubbleSort()
                     mSwapElement = j + 1;
                     draw();
                 }
+                auto end = std::chrono::high_resolution_clock::now();
+                mDrawsTime += std::chrono::nanoseconds(end - mDrawStart);
             }
         }
 
@@ -1081,7 +1096,9 @@ void Visualizer::Engine::shuffle()
     // The fast forward flag is reset
     mIsFastForward = false;
     // Set time to 0
-    mElapsed = 0.000;
+    mElapsed = 0;
+    mElapsedNano = std::chrono::nanoseconds(0);
+    mDrawsTime = std::chrono::nanoseconds(0);
     // Reset the speed change flag
     mHasSpeedChanged = false;
 }
@@ -1135,13 +1152,14 @@ void Visualizer::Engine::draw()
     if(mRequestSort)
     {
         auto end = std::chrono::high_resolution_clock::now();
-        mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
+        mElapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - mStart).count();
+        mElapsedNano = std::chrono::nanoseconds(end - mStart);
     }
 
     // Update the time text
     std::stringstream time_text;
     if(!mIsFastForward && !mHasSpeedChanged)
-        time_text << " Time: " << mElapsed / 1000.0 << "s";
+        time_text << " Time: " << std::fixed << std::setprecision(2) << mElapsed / 1000000.0 << "s";
     else if(mIsFastForward)
         time_text << " Time: " << "Skipped";
     else if(mHasSpeedChanged)
@@ -1151,11 +1169,20 @@ void Visualizer::Engine::draw()
     // Render the time text
     mTimeTexture->render((mWindowSize.x - mUsableWidth - mInfoPanelTexture->getWidth()) / 2, spacing);
 
+    spacing += mTimeTexture->getHeight();
+
+    time_text.str("");
+    time_text << " Real Time: " << std::fixed << std::setprecision(3) << (mElapsedNano - mDrawsTime).count() / 1000000.0 << "ms";
+    mTimeTexture->loadFromRenderedText(time_text.str(), gFontColor, false, mInfoPanelTexture->getWidth());
+    // Render the time text
+    mTimeTexture->render((mWindowSize.x - mUsableWidth - mInfoPanelTexture->getWidth()) / 2, spacing);
+
     // Render the array
     draw_rects();
 
     // Update the screen
     SDL_RenderPresent(mRenderer);
+
 }
 
 void Visualizer::Engine::draw_rects()
