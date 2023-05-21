@@ -52,6 +52,7 @@ namespace Visualizer
         bool mRequestShuffle = false; /*! Whether the user requested a shuffle or not (s was pressed)*/
         bool mIsSorted = false;       /*! Whether the array is sorted or not (end of sort)*/
         bool mIsFastForward = false;  /*! Whether the sort is fast forwarded or not (f was pressed while sorting)*/
+        bool mHasSpeedChanged = false; /*! Whether the speed has changed or not (up or down arrow was pressed)*/
 
         std::string mWindowTitle = "SDL Sort Visualizer"; /*! The title of the window */
 

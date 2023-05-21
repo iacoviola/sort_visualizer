@@ -409,7 +409,11 @@ void Visualizer::Engine::handleEvents()
                     mCurrentDrawSpeed--;
                     std::stringstream ss;
                     ss << " Speed: " << gSPEEDS[mCurrentDrawSpeed] << "x UP/DN";
-                    mSpeedTexture->loadFromRenderedText(ss.str(), gFontColor, false, mInfoPanelTexture->getWidth());
+                    mSpeedTexture->loadFromRenderedText(ss.str(), gFontColor, mInfoPanelTexture->getWidth());
+                    if(mRequestSort)
+                    {
+                        mHasSpeedChanged = true;
+                    }
                 }
                 break;
             // User presses the up arrow key
@@ -420,7 +424,11 @@ void Visualizer::Engine::handleEvents()
                     mCurrentDrawSpeed++;
                     std::stringstream ss;
                     ss << " Speed: " << gSPEEDS[mCurrentDrawSpeed] << "x UP/DN";
-                    mSpeedTexture->loadFromRenderedText(ss.str(), gFontColor, false, mInfoPanelTexture->getWidth());
+                    mSpeedTexture->loadFromRenderedText(ss.str(), gFontColor, mInfoPanelTexture->getWidth());
+                    if(mRequestSort)
+                    {
+                        mHasSpeedChanged = true;
+                    }
                 }
                 break;
             // User presses the J key
@@ -524,6 +532,7 @@ void Visualizer::Engine::cocktailSort()
          */
         for (int i = start; i < end; ++i)
         {
+            mComparisonsCount++;
             if (mNumbersArray[i] > mNumbersArray[i + 1])
             {
                 std::swap(mNumbersArray[i], mNumbersArray[i + 1]);
@@ -536,6 +545,7 @@ void Visualizer::Engine::cocktailSort()
                     {
                         return;
                     }
+                    mSwapElement = i + 1;
                     draw();
                 }
                 swapped = true;
@@ -563,6 +573,7 @@ void Visualizer::Engine::cocktailSort()
          */
         for (int i = end - 1; i >= start; --i)
         {
+            mComparisonsCount++;
             if (mNumbersArray[i] > mNumbersArray[i + 1])
             {
                 std::swap(mNumbersArray[i], mNumbersArray[i + 1]);
@@ -575,6 +586,7 @@ void Visualizer::Engine::cocktailSort()
                     {
                         return;
                     }
+                    mSwapElement = i;
                     draw();
                 }
                 swapped = true;
@@ -937,6 +949,7 @@ void Visualizer::Engine::selectionSort()
         for (j = i + 1; j < gMAX_ELEMENTS[mCurrentElementsNumber]; j++)
         {
 
+            mComparisonsCount++;
             if (mNumbersArray[j] < mNumbersArray[min_idx])
             {
                 min_idx = j;
@@ -957,6 +970,7 @@ void Visualizer::Engine::selectionSort()
          * Swap the found minimum element
          * with the first element
          */
+        mComparisonsCount++;
         if (min_idx != i)
         {
             std::swap(mNumbersArray[min_idx], mNumbersArray[i]);
@@ -991,6 +1005,7 @@ void Visualizer::Engine::insertionSort()
          */
         while (j >= 0 && mNumbersArray[j] > key)
         {
+            mComparisonsCount++;
             mNumbersArray[j + 1] = mNumbersArray[j];
             j = j - 1;
 
@@ -1003,6 +1018,7 @@ void Visualizer::Engine::insertionSort()
                 {
                     return;
                 }
+                mSwapElement = j;
                 draw();
             }
         }
@@ -1014,6 +1030,7 @@ void Visualizer::Engine::gnomeSort(){
     int index = 0;
 
     while (index < gMAX_ELEMENTS[mCurrentElementsNumber]) {
+        mComparisonsCount++;
         if (index == 0)
             index++;
         if (mNumbersArray[index] >= mNumbersArray[index - 1])
@@ -1030,7 +1047,7 @@ void Visualizer::Engine::gnomeSort(){
                 {
                     return;
                 }
-                mSwapElement = index - 1;
+                mSwapElement = index;
                 draw();
             }
         }
@@ -1065,6 +1082,8 @@ void Visualizer::Engine::shuffle()
     mIsFastForward = false;
     // Set time to 0
     mElapsed = 0.000;
+    // Reset the speed change flag
+    mHasSpeedChanged = false;
 }
 
 void Visualizer::Engine::draw()
@@ -1121,8 +1140,10 @@ void Visualizer::Engine::draw()
 
     // Update the time text
     std::stringstream time_text;
-    if(!mIsFastForward)
+    if(!mIsFastForward && !mHasSpeedChanged)
         time_text << " Time: " << mElapsed / 1000.0 << "s";
+    else if(mHasSpeedChanged)
+        time_text << " Time: " << "Sped UP/DN";
     else
         time_text << " Time: " << "Skipped";
 
