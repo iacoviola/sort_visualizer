@@ -1142,10 +1142,10 @@ void Visualizer::Engine::draw()
     std::stringstream time_text;
     if(!mIsFastForward && !mHasSpeedChanged)
         time_text << " Time: " << mElapsed / 1000.0 << "s";
+    else if(mIsFastForward)
+        time_text << " Time: " << "Skipped";
     else if(mHasSpeedChanged)
         time_text << " Time: " << "Sped UP/DN";
-    else
-        time_text << " Time: " << "Skipped";
 
     mTimeTexture->loadFromRenderedText(time_text.str(), gFontColor, false, mInfoPanelTexture->getWidth());
     // Render the time text
