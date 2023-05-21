@@ -409,7 +409,7 @@ void Visualizer::Engine::handleEvents()
                     mCurrentDrawSpeed--;
                     std::stringstream ss;
                     ss << " Speed: " << gSPEEDS[mCurrentDrawSpeed] << "x UP/DN";
-                    mSpeedTexture->loadFromRenderedText(ss.str(), gFontColor, mInfoPanelTexture->getWidth());
+                    mSpeedTexture->loadFromRenderedText(ss.str(), gFontColor, false, mInfoPanelTexture->getWidth());
                     if(mRequestSort)
                     {
                         mHasSpeedChanged = true;
@@ -424,7 +424,7 @@ void Visualizer::Engine::handleEvents()
                     mCurrentDrawSpeed++;
                     std::stringstream ss;
                     ss << " Speed: " << gSPEEDS[mCurrentDrawSpeed] << "x UP/DN";
-                    mSpeedTexture->loadFromRenderedText(ss.str(), gFontColor, mInfoPanelTexture->getWidth());
+                    mSpeedTexture->loadFromRenderedText(ss.str(), gFontColor, false, mInfoPanelTexture->getWidth());
                     if(mRequestSort)
                     {
                         mHasSpeedChanged = true;
