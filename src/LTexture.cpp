@@ -5,9 +5,10 @@
 //  Created by Emiliano Iacopini on 5/16/23.
 //
 
-#include "LTexture.hpp"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
+
+#include "LTexture.hpp"
 
 LTexture::LTexture(SDL_Renderer *renderer)
     : renderer(renderer)
@@ -42,47 +43,7 @@ LTexture::~LTexture()
     free();
 }
 
-bool LTexture::loadFromRenderedText(std::string textureText, SDL_Color textColor, bool wrappable)
-{
-    // Remove preexisting texture
-    free();
-
-    SDL_Surface *textSurface = NULL;
-
-    // Render text surface
-    if (wrappable)
-    {
-        textSurface = TTF_RenderText_LCD_Wrapped(font, textureText.c_str(), textColor, {0x69, 0x2b, 0xe0, 0xFF}, 0);
-    }
-    else
-    {
-        textSurface = TTF_RenderText_LCD(font, textureText.c_str(), textColor, {0x69, 0x2b, 0xe0, 0xFF});
-    }
-
-    if (textSurface == NULL)
-    {
-        printf("Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError());
-        return false;
-    }
-
-    // Create texture from surface pixels
-    mTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-    if (mTexture == NULL)
-    {
-        printf("Unable to create texture from rendered text! SDL Error: %s\n", SDL_GetError());
-        return false;
-    }
-
-    // Get image dimensions
-    mWidth = textSurface->w;
-    mHeight = textSurface->h;
-
-    SDL_FreeSurface(textSurface);
-
-    return true;
-}
-
-bool LTexture::loadFromRenderedText(std::string textureText, SDL_Color textColor, int width)
+bool LTexture::loadFromRenderedText(std::string textureText, SDL_Color textColor, bool wrappable, int width, const PADDING padding)
 {
     // Remove preexisting texture
     free();
@@ -90,8 +51,10 @@ bool LTexture::loadFromRenderedText(std::string textureText, SDL_Color textColor
     SDL_Surface *textSurface = NULL;
     SDL_Surface *newSurface = NULL;
 
-    // Render text surface
-    textSurface = TTF_RenderText_Blended(font, textureText.c_str(), textColor);
+    if (wrappable)
+        textSurface = TTF_RenderText_Blended_Wrapped(font, textureText.c_str(), textColor, 0);
+    else
+        textSurface = TTF_RenderText_Blended(font, textureText.c_str(), textColor);
 
     if (textSurface == NULL)
     {
@@ -99,8 +62,10 @@ bool LTexture::loadFromRenderedText(std::string textureText, SDL_Color textColor
         return false;
     }
 
+    int backWidth = (!width) ? textSurface->w + padding.right : width;
+
     // Render background surface
-    newSurface = SDL_CreateRGBSurface(0, width, textSurface->h, 32, 0, 0, 0, 0);
+    newSurface = SDL_CreateRGBSurface(0, backWidth, textSurface->h + padding.bottom, 32, 0, 0, 0, 0);
 
     if (newSurface == NULL)
     {
@@ -112,7 +77,7 @@ bool LTexture::loadFromRenderedText(std::string textureText, SDL_Color textColor
     SDL_FillRect(newSurface, NULL, SDL_MapRGB(newSurface->format, 0x69, 0x2b, 0xe0));
 
     // Blit text surface to background surface
-    SDL_Rect textRect = {0, 0, 0, 0};
+    SDL_Rect textRect = {padding.left, padding.top, 0, 0};
     SDL_BlitSurface(textSurface, NULL, newSurface, &textRect);
 
     // Create texture from surface pixels

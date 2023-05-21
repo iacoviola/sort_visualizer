@@ -179,14 +179,14 @@ bool Visualizer::Engine::init()
     // Create the texture used for the info text
     mInfoPanelTexture = new LTexture(mRenderer, mRobotoSmall);
     // Load the info text
-    mInfoPanelTexture->loadFromRenderedText(gINFO_TEXT, gFontColor, true);
+    mInfoPanelTexture->loadFromRenderedText(gINFO_TEXT, gFontColor, true, 0, {0, 20, 0, 0});
 
     // Create the texture used for the speed text
     mSpeedTexture = new LTexture(mRenderer, mRobotoSmall);
     // Load the speed text
     std::stringstream speed_text;
     speed_text << " Speed: " << gSPEEDS[mCurrentDrawSpeed] << "x UP/DN";
-    mSpeedTexture->loadFromRenderedText(speed_text.str(), gFontColor, mInfoPanelTexture->getWidth());
+    mSpeedTexture->loadFromRenderedText(speed_text.str(), gFontColor, false, mInfoPanelTexture->getWidth());
 
     // Create the texture used for the swap text
     mSwapsTexture = new LTexture(mRenderer, mRobotoSmall);
@@ -202,7 +202,7 @@ bool Visualizer::Engine::init()
     // Load the element number text
     std::stringstream element_number_text;
     element_number_text << " Elements: " << gMAX_ELEMENTS[mCurrentElementsNumber] << " J/K";
-    mElementNumberTexture->loadFromRenderedText(element_number_text.str(), gFontColor, mInfoPanelTexture->getWidth());
+    mElementNumberTexture->loadFromRenderedText(element_number_text.str(), gFontColor, false, mInfoPanelTexture->getWidth());
 
     // Set background color
     SDL_SetRenderDrawColor(mRenderer, gBackgroundColor.r, gBackgroundColor.g, gBackgroundColor.b, gBackgroundColor.a);
@@ -242,32 +242,32 @@ void Visualizer::Engine::handleEvents()
                 mSortNameTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], gFontColor);
 
                 mInfoPanelTexture->setFontSize(fontSizeSmall);
-                mInfoPanelTexture->loadFromRenderedText(gINFO_TEXT, gFontColor, true);
+                mInfoPanelTexture->loadFromRenderedText(gINFO_TEXT, gFontColor, true, 0, {0, 20, 0, 0});
 
                 mSpeedTexture->setFontSize(fontSizeSmall);
                 std::stringstream speed_text;
                 speed_text << " Speed: " << gSPEEDS[mCurrentDrawSpeed] << "x UP/DN";
-                mSpeedTexture->loadFromRenderedText(speed_text.str(), gFontColor, mInfoPanelTexture->getWidth());
+                mSpeedTexture->loadFromRenderedText(speed_text.str(), gFontColor, false, mInfoPanelTexture->getWidth());
 
                 mElementNumberTexture->setFontSize(fontSizeSmall);
                 std::stringstream elements_text;
                 elements_text << " Elements: " << gMAX_ELEMENTS[mCurrentElementsNumber] << "J/K";
-                mElementNumberTexture->loadFromRenderedText(elements_text.str(), gFontColor, mInfoPanelTexture->getWidth());
+                mElementNumberTexture->loadFromRenderedText(elements_text.str(), gFontColor, false, mInfoPanelTexture->getWidth());
 
                 mSwapsTexture->setFontSize(fontSizeSmall);
                 std::stringstream swap_text;
                 swap_text << " Swaps: " << mSwapsCount;
-                mSwapsTexture->loadFromRenderedText(swap_text.str(), gFontColor, mInfoPanelTexture->getWidth());
+                mSwapsTexture->loadFromRenderedText(swap_text.str(), gFontColor, false, mInfoPanelTexture->getWidth());
 
                 mComparisonsTexture->setFontSize(fontSizeSmall);
                 std::stringstream compare_text;
                 compare_text << " Compare: " << mComparisonsCount;
-                mComparisonsTexture->loadFromRenderedText(compare_text.str(), gFontColor, mInfoPanelTexture->getWidth());
+                mComparisonsTexture->loadFromRenderedText(compare_text.str(), gFontColor, false, mInfoPanelTexture->getWidth());
 
                 mTimeTexture->setFontSize(fontSizeSmall);
                 std::stringstream time_text;
                 time_text << " Time: " << mElapsed << "ms";
-                mTimeTexture->loadFromRenderedText(time_text.str(), gFontColor, mInfoPanelTexture->getWidth());
+                mTimeTexture->loadFromRenderedText(time_text.str(), gFontColor, false, mInfoPanelTexture->getWidth());
             }
         }
         // User presses a key
@@ -409,7 +409,7 @@ void Visualizer::Engine::handleEvents()
                     mCurrentDrawSpeed--;
                     std::stringstream ss;
                     ss << " Speed: " << gSPEEDS[mCurrentDrawSpeed] << "x UP/DN";
-                    mSpeedTexture->loadFromRenderedText(ss.str(), gFontColor, mInfoPanelTexture->getWidth());
+                    mSpeedTexture->loadFromRenderedText(ss.str(), gFontColor, false, mInfoPanelTexture->getWidth());
                 }
                 break;
             // User presses the up arrow key
@@ -420,7 +420,7 @@ void Visualizer::Engine::handleEvents()
                     mCurrentDrawSpeed++;
                     std::stringstream ss;
                     ss << " Speed: " << gSPEEDS[mCurrentDrawSpeed] << "x UP/DN";
-                    mSpeedTexture->loadFromRenderedText(ss.str(), gFontColor, mInfoPanelTexture->getWidth());
+                    mSpeedTexture->loadFromRenderedText(ss.str(), gFontColor, false, mInfoPanelTexture->getWidth());
                 }
                 break;
             // User presses the J key
@@ -431,7 +431,7 @@ void Visualizer::Engine::handleEvents()
                     mCurrentElementsNumber--;
                     std::stringstream en;
                     en << " Elements: " << gMAX_ELEMENTS[mCurrentElementsNumber] << " J/K";
-                    mElementNumberTexture->loadFromRenderedText(en.str(), gFontColor, mInfoPanelTexture->getWidth());
+                    mElementNumberTexture->loadFromRenderedText(en.str(), gFontColor, false, mInfoPanelTexture->getWidth());
                     mNumbersArray.resize(gMAX_ELEMENTS[mCurrentElementsNumber]);
                     std::iota(mNumbersArray.begin(), mNumbersArray.end(), 1);
                     shuffle();
@@ -445,7 +445,7 @@ void Visualizer::Engine::handleEvents()
                     mCurrentElementsNumber++;
                     std::stringstream en;
                     en << " Elements: " << gMAX_ELEMENTS[mCurrentElementsNumber] << " J/K";
-                    mElementNumberTexture->loadFromRenderedText(en.str(), gFontColor, mInfoPanelTexture->getWidth());
+                    mElementNumberTexture->loadFromRenderedText(en.str(), gFontColor, false, mInfoPanelTexture->getWidth());
                     mNumbersArray.resize(gMAX_ELEMENTS[mCurrentElementsNumber]);
                     std::iota(mNumbersArray.begin(), mNumbersArray.end(), 1);
                     shuffle();
@@ -1097,7 +1097,7 @@ void Visualizer::Engine::draw()
     // Update the swap text
     std::stringstream swap_text;
     swap_text << " Swaps: " << mSwapsCount;
-    mSwapsTexture->loadFromRenderedText(swap_text.str(), gFontColor, mInfoPanelTexture->getWidth());
+    mSwapsTexture->loadFromRenderedText(swap_text.str(), gFontColor, false, mInfoPanelTexture->getWidth());
     // Render the swap text
     mSwapsTexture->render((mWindowSize.x - mUsableWidth - mInfoPanelTexture->getWidth()) / 2, spacing);
 
@@ -1106,7 +1106,7 @@ void Visualizer::Engine::draw()
     // Update the comparisons text
     std::stringstream compare_text;
     compare_text << " Compare: " << mComparisonsCount;
-    mComparisonsTexture->loadFromRenderedText(compare_text.str(), gFontColor, mInfoPanelTexture->getWidth());
+    mComparisonsTexture->loadFromRenderedText(compare_text.str(), gFontColor, false, mInfoPanelTexture->getWidth());
     // Render the comparisons text
     mComparisonsTexture->render((mWindowSize.x - mUsableWidth - mInfoPanelTexture->getWidth()) / 2, spacing);
 
@@ -1126,7 +1126,7 @@ void Visualizer::Engine::draw()
     else
         time_text << " Time: " << "Skipped";
 
-    mTimeTexture->loadFromRenderedText(time_text.str(), gFontColor, mInfoPanelTexture->getWidth());
+    mTimeTexture->loadFromRenderedText(time_text.str(), gFontColor, false, mInfoPanelTexture->getWidth());
     // Render the time text
     mTimeTexture->render((mWindowSize.x - mUsableWidth - mInfoPanelTexture->getWidth()) / 2, spacing);
 

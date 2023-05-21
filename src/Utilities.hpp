@@ -48,6 +48,14 @@ const std::string gSORT_NAMES[] = {
     "Gnome Sort"
 };
 
+typedef struct PADDING
+{
+    int top;
+    int right;
+    int bottom;
+    int left;
+} PADDING;
+
 // String used for the info text
 const std::string gINFO_TEXT = " B - bubble sort \n E - shell sort \n Q - quick sort \n H - heap sort \n C - cocktail sort \n M - merge sort \n L - selection sort \n I - insertion sort \n G - gnome sort \n ------- \n Spacebar - start/ff \n S - shuffle \n ESC - quit \n ------- \n";
 // Save the different speeds
