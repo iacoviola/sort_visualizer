@@ -21,9 +21,7 @@ Visualizer::Engine::Engine(const COUPLE size)
 
     // Initialize the engine
     if (!init())
-    {
         throw std::runtime_error("Failed to initialize!");
-    }
 
     // Fill the array with numbers from 1 to gMAX_ELEMENTS[mCurrentElementsNumber]
     std::iota(mNumbersArray.begin(), mNumbersArray.end(), 1);
@@ -40,9 +38,7 @@ Visualizer::Engine::Engine(const COUPLE size, const char *window_title)
 
     // Initialize the engine
     if (!init())
-    {
         throw std::runtime_error("Failed to initialize!");
-    }
 
     // Fill the array with numbers from 1 to gMAX_ELEMENTS[mCurrentElementsNumber]
     std::iota(mNumbersArray.begin(), mNumbersArray.end(), 1);
@@ -61,6 +57,8 @@ Visualizer::Engine::~Engine()
     mSpeedTexture->free();
     mSwapsTexture->free();
     mComparisonsTexture->free();
+    mTimeTexture->free();
+    mElementNumberTexture->free();
 
     // Close the fonts
     TTF_CloseFont(mRobotoSmall);
@@ -85,22 +83,17 @@ Visualizer::Engine::~Engine()
 void Visualizer::Engine::run()
 {
     // Main loop flag
-    while (mIsRunning)
-    {
+    while (mIsRunning) {
         // Handle events on queue
         handleEvents();
 
         // If the user requested a sort, sort the array
         if (mRequestSort)
-        {
             sort();
-        }
 
         // If the user requested a shuffle, shuffle the array
         if (mRequestShuffle)
-        {
             shuffle();
-        }
 
         // Clear the screen
         draw();
@@ -110,24 +103,20 @@ void Visualizer::Engine::run()
 bool Visualizer::Engine::init()
 {
     // Initialize SDL
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
-    {
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         printf("SDL could not initialize! SDL error: %s\n", SDL_GetError());
         return false;
     }
 
     // Set texture filtering to linear
     if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1"))
-    {
         printf("Warning: linear texture filtering not enabled!");
-    }
 
     // Create the window
     mWindow = SDL_CreateWindow(mWindowTitle.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, mWindowSize.x, mWindowSize.y, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 
     // Check if the window was created
-    if (mWindow == NULL)
-    {
+    if (mWindow == NULL) {
         printf("Window could not be created! SDL error: %s\n", SDL_GetError());
         return false;
     }
@@ -136,15 +125,13 @@ bool Visualizer::Engine::init()
     mRenderer = SDL_CreateRenderer(mWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
     // Check if the renderer was created
-    if (mRenderer == NULL)
-    {
+    if (mRenderer == NULL) {
         printf("Renderer could not be created! SDL error: %s\n", SDL_GetError());
         return false;
     }
 
     // Initialize SDL_ttf
-    if (TTF_Init() == -1)
-    {
+    if (TTF_Init() == -1) {
         printf("SDL_ttf could not initialize! SDL_ttf Error: %s\n", TTF_GetError());
         return false;
     }
@@ -156,8 +143,7 @@ bool Visualizer::Engine::init()
     mRobotoSmall = TTF_OpenFont("../res/Roboto-Regular.ttf", fontSizeSmall);
 
     // Check if the font was opened
-    if (mRobotoSmall == NULL)
-    {
+    if (mRobotoSmall == NULL) {
         printf("Failed to load small font! SDL_ttf Error: %s\n", TTF_GetError());
         return false;
     }
@@ -166,40 +152,36 @@ bool Visualizer::Engine::init()
     mRobotoLarge = TTF_OpenFont("../res/Roboto-Regular.ttf", fontSizeLarge);
 
     // Check if the font was opened
-    if (mRobotoLarge == NULL)
-    {
+    if (mRobotoLarge == NULL) {
         printf("Failed to load small font! SDL_ttf Error: %s\n", TTF_GetError());
         return false;
     }
 
-    // Create the texture used for the text
+    // Sort name texture
     mSortNameTexture = new LTexture(mRenderer, mRobotoLarge);
-    // Load the text (starting with bubble sort by default)
     mSortNameTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], gFontColor);
-    // Create the texture used for the info text
-    mInfoPanelTexture = new LTexture(mRenderer, mRobotoSmall);
-    // Load the info text
-    mInfoPanelTexture->loadFromRenderedText(gINFO_TEXT, gFontColor, true, 0, {0, 20, 0, 0});
 
-    // Create the texture used for the speed text
+    // Info panel texture
+    mInfoPanelTexture = new LTexture(mRenderer, mRobotoSmall);
+    mInfoPanelTexture->loadFromRenderedText(gINFO_TEXT, gFontColor, true, 0, {0, 20, 0, 0});    // 20px padding on the right
+
+    // Speed texture
     mSpeedTexture = new LTexture(mRenderer, mRobotoSmall);
-    // Load the speed text
     std::stringstream speed_text;
     speed_text << " Speed: " << gSPEEDS[mCurrentDrawSpeed] << "x UP/DN";
-    mSpeedTexture->loadFromRenderedText(speed_text.str(), gFontColor, false, mInfoPanelTexture->getWidth());
+    mSpeedTexture->loadFromRenderedText(speed_text.str(), gFontColor, false, mInfoPanelTexture->getWidth());    // All texture as wide as the info panel
 
-    // Create the texture used for the swap text
+    // Swaps texture
     mSwapsTexture = new LTexture(mRenderer, mRobotoSmall);
-
-    // Create the texture used for the swap text
+    
+    // Comparisons texture
     mComparisonsTexture = new LTexture(mRenderer, mRobotoSmall);
 
-    // Create the texture used for the time text
+    // Time texture
     mTimeTexture = new LTexture(mRenderer, mRobotoSmall);
 
-    // Create the texture used for the element number text
+    // Elements number texture
     mElementNumberTexture = new LTexture(mRenderer, mRobotoSmall);
-    // Load the element number text
     std::stringstream element_number_text;
     element_number_text << " Elements: " << gMAX_ELEMENTS[mCurrentElementsNumber] << " J/K";
     mElementNumberTexture->loadFromRenderedText(element_number_text.str(), gFontColor, false, mInfoPanelTexture->getWidth());
@@ -509,6 +491,8 @@ void Visualizer::Engine::sort()
     mRequestSort = false;
     // Reset the swap element
     mSwapElement = -1;
+    // Reset the compare elements
+    mCompareElement = -1;
 }
 
 void Visualizer::Engine::cocktailSort()
@@ -519,17 +503,8 @@ void Visualizer::Engine::cocktailSort()
 
     while (swapped)
     {
-        /*
-         * Reset the swapped flag on entering
-         * the loop, because it might be true from
-         * a previous iteration.
-         */
         swapped = false;
 
-        /*
-         * Loop from left to right same as
-         * the bubble sort
-         */
         for (int i = start; i < end; ++i)
         {
             mComparisonsCount++;
@@ -537,40 +512,23 @@ void Visualizer::Engine::cocktailSort()
             {
                 std::swap(mNumbersArray[i], mNumbersArray[i + 1]);
                 mSwapsCount++;
-                if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
-                {
-                    // Handle events every few iterations
-                    handleEvents();
-                    if (!mIsRunning)
-                    {
-                        return;
-                    }
-                    mSwapElement = i + 1;
-                    draw();
-                }
+                mSwapElement = i + 1;
                 swapped = true;
             }
+            
+            if (mComparisonsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
+            {
+                handleEvents();
+                if (!mIsRunning) return;
+                draw();
+            }
         }
-        // if nothing moved, then array is sorted.
         if (!swapped)
             break;
 
-        /*
-         * Otherwise, reset the swapped flag so that it
-         * can be used in the next stage
-         */
         swapped = false;
-
-        /*
-         * Move the end point back by one, because
-         * item at the end is in its rightful spot
-         */
         end--;
 
-        /*
-         * From right to left, doing the
-         * same comparison as in the previous stage
-         */
         for (int i = end - 1; i >= start; --i)
         {
             mComparisonsCount++;
@@ -578,26 +536,18 @@ void Visualizer::Engine::cocktailSort()
             {
                 std::swap(mNumbersArray[i], mNumbersArray[i + 1]);
                 mSwapsCount++;
-                if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
-                {
-                    // Handle events every few iterations
-                    handleEvents();
-                    if (!mIsRunning)
-                    {
-                        return;
-                    }
-                    mSwapElement = i;
-                    draw();
-                }
+                mSwapElement = i;
                 swapped = true;
+            }
+
+            if (mComparisonsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
+            {
+                handleEvents();
+                if (!mIsRunning) return;
+                draw();
             }
         }
 
-        /*
-         * increase the starting point, because
-         * the last stage would have moved the next
-         * smallest number to its rightful spot.
-         */
         start++;
     }
 }
@@ -621,12 +571,6 @@ void Visualizer::Engine::quickSort(int low, int high)
 
 int Visualizer::Engine::partition(int low, int high)
 {
-    // Handle events time partition is called
-    handleEvents();
-    if (!mIsRunning)
-    {
-        return -1;
-    }
     int pivot = mNumbersArray[high];
     int i = (low - 1);
 
@@ -639,6 +583,8 @@ int Visualizer::Engine::partition(int low, int high)
             mSwapsCount++;
             if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
             {
+                handleEvents();
+                if (!mIsRunning) return -1;
                 mSwapElement = j;
                 draw();
             }
@@ -649,6 +595,8 @@ int Visualizer::Engine::partition(int low, int high)
     // If fast forward is enabled, draw the array on the screen immediately
     if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] && !mIsFastForward)
     {
+        handleEvents();
+        if (!mIsRunning) return -1;
         mSwapElement = high;
         draw();
     }
@@ -669,17 +617,13 @@ void Visualizer::Engine::bubbleSort()
                 std::swap(mNumbersArray[j], mNumbersArray[j + 1]);
                 swapped = true;
                 mSwapsCount++;
-                if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
-                {
-                    // Handle events every few iterations
-                    handleEvents();
-                    if (!mIsRunning)
-                    {
-                        return;
-                    }
-                    mSwapElement = j + 1;
-                    draw();
-                }
+            }
+            mSwapElement = j + 1;
+            if (mComparisonsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
+            {
+                handleEvents();
+                if (!mIsRunning) return;
+                draw();
             }
         }
 
@@ -775,23 +719,18 @@ void Visualizer::Engine::heapify(int n, int i)
     {
         std::swap(mNumbersArray[i], mNumbersArray[largest]);
 
-        mSwapsCount++;
-        if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
-        {
-            // Handle events every few iterations
-            handleEvents();
-            if (!mIsRunning)
-            {
-                return;
-            }
-            draw();
-        }
-
         /*
          * Recursively heapify the affected
          * sub-tree
          */
         heapify(n, largest);
+    }
+    mSwapsCount++;
+    if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
+    {
+        handleEvents();
+        if (!mIsRunning) return;
+        draw();
     }
 }
 
@@ -871,6 +810,7 @@ void Visualizer::Engine::merge(int left, int mid, int right)
                 return;
             }
             draw();
+            SDL_Delay(10);
         }
         if (leftArray[indexOfSubArrayOne] <= rightArray[indexOfSubArrayTwo])
         {
@@ -882,6 +822,7 @@ void Visualizer::Engine::merge(int left, int mid, int right)
             mNumbersArray[indexOfMergedArray] = rightArray[indexOfSubArrayTwo];
             indexOfSubArrayTwo++;
         }
+        mSwapElement = indexOfMergedArray;
         indexOfMergedArray++;
     }
     /*
@@ -950,41 +891,27 @@ void Visualizer::Engine::selectionSort()
         {
 
             mComparisonsCount++;
-            if (mNumbersArray[j] < mNumbersArray[min_idx])
-            {
+            if (mNumbersArray[j] < mNumbersArray[min_idx]){
                 min_idx = j;
-                mSwapsCount++;
-                if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
-                {
-                    // Handle events every few iterations
-                    handleEvents();
-                    if (!mIsRunning)
-                    {
-                        return;
-                    }
-                    draw();
-                }
+                mSwapElement = min_idx;
+            }
+
+            mCompareElement = j;
+            if (mComparisonsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
+            {
+                handleEvents();
+                if (!mIsRunning) return;
+                draw();
             }
         }
         /*
          * Swap the found minimum element
          * with the first element
          */
-        mComparisonsCount++;
         if (min_idx != i)
         {
             std::swap(mNumbersArray[min_idx], mNumbersArray[i]);
             mSwapsCount++;
-            if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
-            {
-                // Handle events every few iterations
-                handleEvents();
-                if (!mIsRunning)
-                {
-                    return;
-                }
-                draw();
-            }
         }
     }
 }
@@ -996,33 +923,26 @@ void Visualizer::Engine::insertionSort()
     {
         key = mNumbersArray[i];
         j = i - 1;
+        mSwapElement = i;
 
-        /*
-         * Move elements of arr[0..i-1],
-         * that are greater than key, to one
-         * position ahead of their
-         * current position
-         */
         while (j >= 0 && mNumbersArray[j] > key)
         {
             mComparisonsCount++;
             mNumbersArray[j + 1] = mNumbersArray[j];
             j = j - 1;
 
-            mSwapsCount++;
-            if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
+            mCompareElement = j;
+
+            if (mComparisonsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
             {
-                // Handle events every few iterations
                 handleEvents();
-                if (!mIsRunning)
-                {
-                    return;
-                }
-                mSwapElement = j;
+                if (!mIsRunning) return;
                 draw();
             }
         }
+
         mNumbersArray[j + 1] = key;
+        mSwapsCount++;
     }
 }
 
@@ -1041,12 +961,8 @@ void Visualizer::Engine::gnomeSort(){
             mSwapsCount++;
             if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
             {
-                // Handle events every few iterations
                 handleEvents();
-                if (!mIsRunning)
-                {
-                    return;
-                }
+                if (!mIsRunning) return;
                 mSwapElement = index;
                 draw();
             }
@@ -1181,7 +1097,9 @@ void Visualizer::Engine::draw_rects()
     for (int i = 0; i < gMAX_ELEMENTS[mCurrentElementsNumber]; i++)
     {
         // Set the color of each rectangle (red if it's the element being swapped)
-        if(mSwapElement == i)
+        if(mCompareElement == i)
+            SDL_SetRenderDrawColor(mRenderer, 0x00, 0xFF, 0x00, 0xFF);
+        else if(mSwapElement == i)
             SDL_SetRenderDrawColor(mRenderer, 0xFF, 0x00, 0x00, 0xFF);
         else  
             SDL_SetRenderDrawColor(mRenderer, startColorR + colorStepR * mNumbersArray[i], startColorG + colorStepG * mNumbersArray[i], startColorB + colorStepB * mNumbersArray[i], 0xFF);

@@ -59,11 +59,12 @@ namespace Visualizer
         int mSwapsCount = 0;       /*! The number of swaps performed during the sort */
         int mComparisonsCount = 0; /*! The number of comparisons performed during the sort */
 
-        int mCurrentDrawSpeed = 3; /*! The currently selected drawing speed */
+        int mCurrentDrawSpeed = 0; /*! The currently selected drawing speed */
 
         int mSwapElement = -1; /*! The index of the element to be swapped */
+        int mCompareElement = -1; /*! The index of the element to be compared */
 
-        int mCurrentElementsNumber = 5; /*! The currently selected number of elements */
+        int mCurrentElementsNumber = 3; /*! The currently selected number of elements */
 
         SORT_IDENTIFIER mCurrentSort = BUBBLE_SORT; /*! The currently selected sort algorithm */
 
