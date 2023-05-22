@@ -113,7 +113,10 @@ bool Visualizer::Engine::init()
         printf("Warning: linear texture filtering not enabled!");
 
     // Create the window
-    mWindow = SDL_CreateWindow(mWindowTitle.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, mWindowSize.x, mWindowSize.y, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+    mWindow = SDL_CreateWindow(mWindowTitle.c_str(), 
+                               SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
+                               mWindowSize.x, mWindowSize.y, 
+                               SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 
     // Check if the window was created
     if (mWindow == NULL) {
@@ -196,18 +199,14 @@ void Visualizer::Engine::handleEvents()
     SDL_Event e;
 
     // Handle events on queue
-    while (SDL_PollEvent(&e))
-    {
+    while (SDL_PollEvent(&e)) {
         // User requests quit
-        if (e.type == SDL_QUIT)
-        {
+        if (e.type == SDL_QUIT) {
             mIsRunning = false;
         }
-        else if (e.type == SDL_WINDOWEVENT)
-        {
+        else if (e.type == SDL_WINDOWEVENT) {
             // Window resized
-            if (e.window.event == SDL_WINDOWEVENT_RESIZED)
-            {
+            if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
                 // Get the new window size
                 mWindowSize.x = e.window.data1;
                 mWindowSize.y = e.window.data2;
@@ -253,194 +252,176 @@ void Visualizer::Engine::handleEvents()
             }
         }
         // User presses a key
-        else if (e.type == SDL_KEYDOWN)
-        {
-            switch (e.key.keysym.sym)
-            {
-            // User presses escape
-            case SDLK_ESCAPE:
-                mIsRunning = false;
-                break;
-            // User presses the B key
-            case SDLK_b:
-                // If the array is not sorted and if the current sort is not already bubble sort
-                if (!mRequestSort && mCurrentSort != BUBBLE_SORT)
-                {
-                    // Set the current sort to bubble sort
-                    mCurrentSort = BUBBLE_SORT;
-                    // Load the text for bubble sort
-                    mSortNameTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], gFontColor);
-                }
-                break;
-            // User presses the Q key
-            case SDLK_q:
-                // If the array is not sorted and if the current sort is not already quick sort
-                if (!mRequestSort && mCurrentSort != QUICK_SORT)
-                {
-                    // Set the current sort to quick sort
-                    mCurrentSort = QUICK_SORT;
-                    // Load the text for quick sort
-                    mSortNameTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], gFontColor);
-                }
-                break;
-            // User presses the C key
-            case SDLK_c:
-                // If the array is not sorted and if the current sort is not already cocktail sort
-                if (!mRequestSort && mCurrentSort != COCKTAIL_SORT)
-                {
-                    // Set the current sort to cocktail sort
-                    mCurrentSort = COCKTAIL_SORT;
-                    // Load the text for cocktail sort
-                    mSortNameTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], gFontColor);
-                }
-                break;
-            // User presses the E key
-            case SDLK_e:
-                // If the array is not sorted and if the current sort is not already shell sort
-                if (!mRequestSort && mCurrentSort != SHELL_SORT)
-                {
-                    // Set the current sort to shell sort
-                    mCurrentSort = SHELL_SORT;
-                    // Load the text for shell sort
-                    mSortNameTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], gFontColor);
-                }
-                break;
-            // User presses the H key
-            case SDLK_h:
-                // If the array is not sorted and if the current sort is not already heap sort
-                if (!mRequestSort && mCurrentSort != HEAP_SORT)
-                {
-                    // Set the current sort to heap sort
-                    mCurrentSort = HEAP_SORT;
-                    // Load the text for heap sort
-                    mSortNameTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], gFontColor);
-                }
-                break;
-            // User presses the M key
-            case SDLK_m:
-                // If the array is not sorted and if the current sort is not already merge sort
-                if (!mRequestSort && mCurrentSort != MERGE_SORT)
-                {
-                    // Set the current sort to merge sort
-                    mCurrentSort = MERGE_SORT;
-                    // Load the text for merge sort
-                    mSortNameTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], gFontColor);
-                }
-                break;
-            // User presses the L key
-            case SDLK_l:
-                // If the array is not sorted and if the current sort is not already selection sort
-                if (!mRequestSort && mCurrentSort != SELECTION_SORT)
-                {
-                    // Set the current sort to selection sort
-                    mCurrentSort = SELECTION_SORT;
-                    // Load the text for selection sort
-                    mSortNameTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], gFontColor);
-                }
-                break;
-            // User presses the I key
-            case SDLK_i:
-                // If the array is not sorted and if the current sort is not already insertion sort
-                if (!mRequestSort && mCurrentSort != INSERTION_SORT)
-                {
-                    // Set the current sort to insertion sort
-                    mCurrentSort = INSERTION_SORT;
-                    // Load the text for insertion sort
-                    mSortNameTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], gFontColor);
-                }
-                break;
-            // User presses the G key
-            case SDLK_g:
-                // If the array is not sorted and if the current sort is not already gnome sort
-                if (!mRequestSort && mCurrentSort != GNOME_SORT)
-                {
-                    // Set the current sort to gnome sort
-                    mCurrentSort = GNOME_SORT;
-                    // Load the text for gnome sort
-                    mSortNameTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], gFontColor);
-                }
-                break;
-            // User presses the SPACEBAR key
-            case SDLK_SPACE:
-                // If the array is not sorted
-                if (!mIsSorted && !mRequestSort)
-                {
-                    // Stops and starts the sort
-                    mRequestSort = true;
-                }
-                else if (mRequestSort)
-                {
-                    // Fast forwards the sort
-                    mIsFastForward = true;
-                }
-                break;
-            // User presses the S key
-            case SDLK_s:
-                // If the array is sorted
-                if (mIsSorted)
-                {
-                    // Shuffles the array
-                    mRequestShuffle = true;
-                }
-                break;
-            // User presses the down arrow key
-            case SDLK_DOWN:
-                if (mCurrentDrawSpeed > 0)
-                {
-                    // Decreases the speed
-                    mCurrentDrawSpeed--;
-                    std::stringstream ss;
-                    ss << " Speed: " << gSPEEDS[mCurrentDrawSpeed] << "x UP/DN";
-                    mSpeedTexture->loadFromRenderedText(ss.str(), gFontColor, false, mInfoPanelTexture->getWidth());
-                    if(mRequestSort)
-                    {
-                        mHasSpeedChanged = true;
+        else if (e.type == SDL_KEYDOWN) {
+            switch (e.key.keysym.sym) {
+                // User presses escape
+                case SDLK_ESCAPE:
+                    mIsRunning = false;
+                    break;
+                // User presses the B key
+                case SDLK_b:
+                    // If the array is not sorted and if the current sort is not already bubble sort
+                    if (!mRequestSort && mCurrentSort != BUBBLE_SORT) {
+                        // Set the current sort to bubble sort
+                        mCurrentSort = BUBBLE_SORT;
+                        // Load the text for bubble sort
+                        mSortNameTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], gFontColor);
                     }
-                }
-                break;
-            // User presses the up arrow key
-            case SDLK_UP:
-                if (mCurrentDrawSpeed < 5)
-                {
-                    // Decreases the speed
-                    mCurrentDrawSpeed++;
-                    std::stringstream ss;
-                    ss << " Speed: " << gSPEEDS[mCurrentDrawSpeed] << "x UP/DN";
-                    mSpeedTexture->loadFromRenderedText(ss.str(), gFontColor, false, mInfoPanelTexture->getWidth());
-                    if(mRequestSort)
-                    {
-                        mHasSpeedChanged = true;
+                    break;
+                // User presses the Q key
+                case SDLK_q:
+                    // If the array is not sorted and if the current sort is not already quick sort
+                    if (!mRequestSort && mCurrentSort != QUICK_SORT) {
+                        // Set the current sort to quick sort
+                        mCurrentSort = QUICK_SORT;
+                        // Load the text for quick sort
+                        mSortNameTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], gFontColor);
                     }
-                }
-                break;
-            // User presses the J key
-            case SDLK_j:
-                if (mCurrentElementsNumber > 0 && !mRequestSort)
-                {
-                    // Decreases the speed
-                    mCurrentElementsNumber--;
-                    std::stringstream en;
-                    en << " Elements: " << gMAX_ELEMENTS[mCurrentElementsNumber] << " J/K";
-                    mElementNumberTexture->loadFromRenderedText(en.str(), gFontColor, false, mInfoPanelTexture->getWidth());
-                    mNumbersArray.resize(gMAX_ELEMENTS[mCurrentElementsNumber]);
-                    std::iota(mNumbersArray.begin(), mNumbersArray.end(), 1);
-                    shuffle();
-                }
-                break;
-            // User presses the K key
-            case SDLK_k:
-                if (mCurrentElementsNumber < 8 && !mRequestSort)
-                {
-                    // Decreases the speed
-                    mCurrentElementsNumber++;
-                    std::stringstream en;
-                    en << " Elements: " << gMAX_ELEMENTS[mCurrentElementsNumber] << " J/K";
-                    mElementNumberTexture->loadFromRenderedText(en.str(), gFontColor, false, mInfoPanelTexture->getWidth());
-                    mNumbersArray.resize(gMAX_ELEMENTS[mCurrentElementsNumber]);
-                    std::iota(mNumbersArray.begin(), mNumbersArray.end(), 1);
-                    shuffle();
-                }
-                break;
+                    break;
+                // User presses the C key
+                case SDLK_c:
+                    // If the array is not sorted and if the current sort is not already cocktail sort
+                    if (!mRequestSort && mCurrentSort != COCKTAIL_SORT) {
+                        // Set the current sort to cocktail sort
+                        mCurrentSort = COCKTAIL_SORT;
+                        // Load the text for cocktail sort
+                        mSortNameTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], gFontColor);
+                    }
+                    break;
+                // User presses the E key
+                case SDLK_e:
+                    // If the array is not sorted and if the current sort is not already shell sort
+                    if (!mRequestSort && mCurrentSort != SHELL_SORT) {
+                        // Set the current sort to shell sort
+                        mCurrentSort = SHELL_SORT;
+                        // Load the text for shell sort
+                        mSortNameTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], gFontColor);
+                    }
+                    break;
+                // User presses the H key
+                case SDLK_h:
+                    // If the array is not sorted and if the current sort is not already heap sort
+                    if (!mRequestSort && mCurrentSort != HEAP_SORT) {
+                        // Set the current sort to heap sort
+                        mCurrentSort = HEAP_SORT;
+                        // Load the text for heap sort
+                        mSortNameTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], gFontColor);
+                    }
+                    break;
+                // User presses the M key
+                case SDLK_m:
+                    // If the array is not sorted and if the current sort is not already merge sort
+                    if (!mRequestSort && mCurrentSort != MERGE_SORT) {
+                        // Set the current sort to merge sort
+                        mCurrentSort = MERGE_SORT;
+                        // Load the text for merge sort
+                        mSortNameTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], gFontColor);
+                    }
+                    break;
+                // User presses the L key
+                case SDLK_l:
+                    // If the array is not sorted and if the current sort is not already selection sort
+                    if (!mRequestSort && mCurrentSort != SELECTION_SORT) {
+                        // Set the current sort to selection sort
+                        mCurrentSort = SELECTION_SORT;
+                        // Load the text for selection sort
+                        mSortNameTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], gFontColor);
+                    }
+                    break;
+                // User presses the I key
+                case SDLK_i:
+                    // If the array is not sorted and if the current sort is not already insertion sort
+                    if (!mRequestSort && mCurrentSort != INSERTION_SORT) {
+                        // Set the current sort to insertion sort
+                        mCurrentSort = INSERTION_SORT;
+                        // Load the text for insertion sort
+                        mSortNameTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], gFontColor);
+                    }
+                    break;
+                // User presses the G key
+                case SDLK_g:
+                    // If the array is not sorted and if the current sort is not already gnome sort
+                    if (!mRequestSort && mCurrentSort != GNOME_SORT) {
+                        // Set the current sort to gnome sort
+                        mCurrentSort = GNOME_SORT;
+                        // Load the text for gnome sort
+                        mSortNameTexture->loadFromRenderedText(gSORT_NAMES[mCurrentSort], gFontColor);
+                    }
+                    break;
+                // User presses the SPACEBAR key
+                case SDLK_SPACE:
+                    // If the array is not sorted
+                    if (!mIsSorted && !mRequestSort) {
+                        // Stops and starts the sort
+                        mRequestSort = true;
+                    }
+                    else if (mRequestSort) {
+                        // Fast forwards the sort
+                        mIsFastForward = true;
+                    }
+                    break;
+                // User presses the S key
+                case SDLK_s:
+                    // If the array is sorted
+                    if (mIsSorted) {
+                        // Shuffles the array
+                        mRequestShuffle = true;
+                    }
+                    break;
+                // User presses the down arrow key
+                case SDLK_DOWN:
+                    if (mCurrentDrawSpeed > 0) {
+                        // Decreases the speed
+                        mCurrentDrawSpeed--;
+                        std::stringstream ss;
+                        ss << " Speed: " << gSPEEDS[mCurrentDrawSpeed] << "x UP/DN";
+                        mSpeedTexture->loadFromRenderedText(ss.str(), gFontColor, false, mInfoPanelTexture->getWidth());
+                        if(mRequestSort)
+                        {
+                            mHasSpeedChanged = true;
+                        }
+                    }
+                    break;
+                // User presses the up arrow key
+                case SDLK_UP:
+                    if (mCurrentDrawSpeed < 5) {
+                        // Decreases the speed
+                        mCurrentDrawSpeed++;
+                        std::stringstream ss;
+                        ss << " Speed: " << gSPEEDS[mCurrentDrawSpeed] << "x UP/DN";
+                        mSpeedTexture->loadFromRenderedText(ss.str(), gFontColor, false, mInfoPanelTexture->getWidth());
+                        if(mRequestSort)
+                        {
+                            mHasSpeedChanged = true;
+                        }
+                    }
+                    break;
+                // User presses the J key
+                case SDLK_j:
+                    if (mCurrentElementsNumber > 0 && !mRequestSort) {
+                        // Decreases the speed
+                        mCurrentElementsNumber--;
+                        std::stringstream en;
+                        en << " Elements: " << gMAX_ELEMENTS[mCurrentElementsNumber] << " J/K";
+                        mElementNumberTexture->loadFromRenderedText(en.str(), gFontColor, false, mInfoPanelTexture->getWidth());
+                        mNumbersArray.resize(gMAX_ELEMENTS[mCurrentElementsNumber]);
+                        std::iota(mNumbersArray.begin(), mNumbersArray.end(), 1);
+                        shuffle();
+                    }
+                    break;
+                // User presses the K key
+                case SDLK_k:
+                    if (mCurrentElementsNumber < 8 && !mRequestSort) {
+                        // Decreases the speed
+                        mCurrentElementsNumber++;
+                        std::stringstream en;
+                        en << " Elements: " << gMAX_ELEMENTS[mCurrentElementsNumber] << " J/K";
+                        mElementNumberTexture->loadFromRenderedText(en.str(), gFontColor, false, mInfoPanelTexture->getWidth());
+                        mNumbersArray.resize(gMAX_ELEMENTS[mCurrentElementsNumber]);
+                        std::iota(mNumbersArray.begin(), mNumbersArray.end(), 1);
+                        shuffle();
+                    }
+                    break;
             }
         }
     }
@@ -451,35 +432,34 @@ void Visualizer::Engine::sort()
     // Start the timer
     mStart = std::chrono::high_resolution_clock::now();
     // Sorts the array based on the current sort selected
-    switch (mCurrentSort)
-    {
-    case BUBBLE_SORT:
-        bubbleSort();
-        break;
-    case QUICK_SORT:
-        quickSort(0, gMAX_ELEMENTS[mCurrentElementsNumber] - 1);
-        break;
-    case COCKTAIL_SORT:
-        cocktailSort();
-        break;
-    case SHELL_SORT:
-        shellSort();
-        break;
-    case HEAP_SORT:
-        heapSort();
-        break;
-    case MERGE_SORT:
-        mergeSort(0, gMAX_ELEMENTS[mCurrentElementsNumber] - 1);
-        break;
-    case SELECTION_SORT:
-        selectionSort();
-        break;
-    case INSERTION_SORT:
-        insertionSort();
-        break;
-    case GNOME_SORT:
-        gnomeSort();
-        break;
+    switch (mCurrentSort) {
+        case BUBBLE_SORT:
+            bubbleSort();
+            break;
+        case QUICK_SORT:
+            quickSort(0, gMAX_ELEMENTS[mCurrentElementsNumber] - 1);
+            break;
+        case COCKTAIL_SORT:
+            cocktailSort();
+            break;
+        case SHELL_SORT:
+            shellSort();
+            break;
+        case HEAP_SORT:
+            heapSort();
+            break;
+        case MERGE_SORT:
+            mergeSort(0, gMAX_ELEMENTS[mCurrentElementsNumber] - 1);
+            break;
+        case SELECTION_SORT:
+            selectionSort();
+            break;
+        case INSERTION_SORT:
+            insertionSort();
+            break;
+        case GNOME_SORT:
+            gnomeSort();
+            break;
     }
 
     // Stop the timer
@@ -501,26 +481,21 @@ void Visualizer::Engine::cocktailSort()
     int start = 0;
     int end = gMAX_ELEMENTS[mCurrentElementsNumber] - 1;
 
-    while (swapped)
-    {
+    while (swapped) {
         swapped = false;
 
-        for (int i = start; i < end; ++i)
-        {
+        for (int i = start; i < end; ++i) {
             mComparisonsCount++;
-            if (mNumbersArray[i] > mNumbersArray[i + 1])
-            {
+            if (mNumbersArray[i] > mNumbersArray[i + 1]) {
                 std::swap(mNumbersArray[i], mNumbersArray[i + 1]);
                 mSwapsCount++;
                 mSwapElement = i + 1;
                 swapped = true;
-            }
-            
-            if (mComparisonsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
-            {
-                handleEvents();
-                if (!mIsRunning) return;
-                draw();
+                if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward) {
+                    handleEvents();
+                    if (!mIsRunning) return;
+                    draw();
+                }
             }
         }
         if (!swapped)
@@ -529,22 +504,18 @@ void Visualizer::Engine::cocktailSort()
         swapped = false;
         end--;
 
-        for (int i = end - 1; i >= start; --i)
-        {
+        for (int i = end - 1; i >= start; --i) {
             mComparisonsCount++;
-            if (mNumbersArray[i] > mNumbersArray[i + 1])
-            {
+            if (mNumbersArray[i] > mNumbersArray[i + 1]) {
                 std::swap(mNumbersArray[i], mNumbersArray[i + 1]);
                 mSwapsCount++;
                 mSwapElement = i;
                 swapped = true;
-            }
-
-            if (mComparisonsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
-            {
-                handleEvents();
-                if (!mIsRunning) return;
-                draw();
+                if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward) {
+                    handleEvents();
+                    if (!mIsRunning) return;
+                    draw();
+                }
             }
         }
 
@@ -554,15 +525,11 @@ void Visualizer::Engine::cocktailSort()
 
 void Visualizer::Engine::quickSort(int low, int high)
 {
-    if (low < high)
-    {
+    if (low < high) {
         int pi = partition(low, high);
 
         // If the sort is stopped or the application is closed while inside of partition, stop the sort
-        if (!mIsRunning)
-        {
-            return;
-        }
+        if (!mIsRunning) return;
 
         quickSort(low, pi - 1);
         quickSort(pi + 1, high);
@@ -574,15 +541,12 @@ int Visualizer::Engine::partition(int low, int high)
     int pivot = mNumbersArray[high];
     int i = (low - 1);
 
-    for (int j = low; j <= high - 1; j++)
-    {
-        if (mNumbersArray[j] < pivot)
-        {
+    for (int j = low; j <= high - 1; j++) {
+        if (mNumbersArray[j] < pivot) {
             i++;
             std::swap(mNumbersArray[i], mNumbersArray[j]);
             mSwapsCount++;
-            if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
-            {
+            if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward) {
                 handleEvents();
                 if (!mIsRunning) return -1;
                 mSwapElement = j;
@@ -593,8 +557,7 @@ int Visualizer::Engine::partition(int low, int high)
     std::swap(mNumbersArray[i + 1], mNumbersArray[high]);
     mSwapsCount++;
     // If fast forward is enabled, draw the array on the screen immediately
-    if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] && !mIsFastForward)
-    {
+    if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] && !mIsFastForward) {
         handleEvents();
         if (!mIsRunning) return -1;
         mSwapElement = high;
@@ -606,163 +569,89 @@ int Visualizer::Engine::partition(int low, int high)
 void Visualizer::Engine::bubbleSort()
 {
     bool swapped;
-    for (int i = 0; i < gMAX_ELEMENTS[mCurrentElementsNumber] - 1; i++)
-    {
+    for (int i = 0; i < gMAX_ELEMENTS[mCurrentElementsNumber] - 1; i++) {
         swapped = false;
-        for (int j = 0; j < gMAX_ELEMENTS[mCurrentElementsNumber] - i - 1; j++)
-        {
+        for (int j = 0; j < gMAX_ELEMENTS[mCurrentElementsNumber] - i - 1; j++) {
             mComparisonsCount++;
-            if (mNumbersArray[j] > mNumbersArray[j + 1])
-            {
+            if (mNumbersArray[j] > mNumbersArray[j + 1]) {
                 std::swap(mNumbersArray[j], mNumbersArray[j + 1]);
                 swapped = true;
                 mSwapsCount++;
-            }
-            mSwapElement = j + 1;
-            if (mComparisonsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
-            {
-                handleEvents();
-                if (!mIsRunning) return;
-                draw();
+                mSwapElement = j + 1;
+                if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward) {
+                    handleEvents();
+                    if (!mIsRunning) return;
+                    draw();
+                }
             }
         }
 
-        // If no two elements were swapped in the inner loop, the array is already sorted
-        if (!swapped)
-        {
-            break;
-        }
+        if (!swapped) break;
     }
 }
 
 void Visualizer::Engine::shellSort()
 {
-    // Start with a big gap, then reduce the gap
-    for (int gap = gMAX_ELEMENTS[mCurrentElementsNumber] / 2; gap > 0; gap /= 2)
-    {
-        /*
-         * Do a gapped insertion sort for this gap size.
-         * The first gap elements a[0..gap-1] are already in gapped order
-         * keep adding one more element until the entire array is
-         * gap sorted
-         */
-        for (int i = gap; i < gMAX_ELEMENTS[mCurrentElementsNumber]; i += 1)
-        {
-            /*
-             * Add a[i] to the elements that have been gap sorted
-             * save a[i] in temp and make a hole at position i
-             */
-            int temp = mNumbersArray[i];
+    for (int gap = gMAX_ELEMENTS[mCurrentElementsNumber] / 2; gap > 0; gap /= 2) {
 
-            /*
-             * shift earlier gap-sorted elements up until the correct
-             * location for a[i] is found
-             */
-            int j;
-            for (j = i; j >= gap && mNumbersArray[j - gap] > temp; j -= gap)
-            {
+        for (int i = gap; i < gMAX_ELEMENTS[mCurrentElementsNumber]; i += 1) {
+
+            int temp = mNumbersArray[i], j;
+
+            for (j = i; j >= gap && mNumbersArray[j - gap] > temp; j -= gap) {
                 mNumbersArray[j] = mNumbersArray[j - gap];
                 mSwapsCount++;
-                if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
-                {
-                    // Handle events every few iterations
+                if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward) {
                     handleEvents();
-                    if (!mIsRunning)
-                    {
-                        return;
-                    }
+                    if (!mIsRunning) return;
                     draw();
                 }
             }
 
-            //  put temp (the original a[i]) in its correct location
             mNumbersArray[j] = temp;
-            mSwapsCount++;
-            if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
-            {
-                // Handle events every few iterations
-                handleEvents();
-                if (!mIsRunning)
-                {
-                    return;
-                }
-                draw();
-            }
         }
     }
 }
 
 void Visualizer::Engine::heapify(int n, int i)
 {
-    // Initialize largest as root
     int largest = i;
-
-    // left = 2*i + 1
     int l = 2 * i + 1;
-
-    // right = 2*i + 2
     int r = 2 * i + 2;
 
-    // If left child is larger than root
     if (l < n && mNumbersArray[l] > mNumbersArray[largest])
         largest = l;
 
-    /*
-     * If right child is larger than largest
-     * so far
-     */
     if (r < n && mNumbersArray[r] > mNumbersArray[largest])
         largest = r;
 
-    // If largest is not root
-    if (largest != i)
-    {
+    if (largest != i) {
         std::swap(mNumbersArray[i], mNumbersArray[largest]);
-
-        /*
-         * Recursively heapify the affected
-         * sub-tree
-         */
+        mSwapsCount++;
+        if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward) {
+            handleEvents();
+            if (!mIsRunning) return;
+            draw();
+        }
         heapify(n, largest);
-    }
-    mSwapsCount++;
-    if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
-    {
-        handleEvents();
-        if (!mIsRunning) return;
-        draw();
     }
 }
 
 void Visualizer::Engine::heapSort()
 {
-    // Build heap (rearrange array)
     for (int i = gMAX_ELEMENTS[mCurrentElementsNumber] / 2 - 1; i >= 0; i--)
         heapify(gMAX_ELEMENTS[mCurrentElementsNumber], i);
 
-    /*
-     * One by one extract an element
-     * from heap
-     */
-    for (int i = gMAX_ELEMENTS[mCurrentElementsNumber] - 1; i > 0; i--)
-    {
+    for (int i = gMAX_ELEMENTS[mCurrentElementsNumber] - 1; i > 0; i--) {
 
-        // Move current root to end
         std::swap(mNumbersArray[0], mNumbersArray[i]);
 
         mSwapsCount++;
-        if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
-        {
-            // Handle events every few iterations
+        if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward) {
             handleEvents();
-            if (!mIsRunning)
-            {
-                return;
-            }
+            if (!mIsRunning) return;
             draw();
         }
-
-        // call max heapify on the reduced heap
         heapify(i, 0);
     }
 }
@@ -798,59 +687,38 @@ void Visualizer::Engine::merge(int left, int mid, int right)
     int indexOfMergedArray = left; // Initial index of merged array
 
     // Merge the temp arrays back into array[left..right]
-    while (indexOfSubArrayOne < subArrayOne && indexOfSubArrayTwo < subArrayTwo)
-    {
+    while (indexOfSubArrayOne < subArrayOne && indexOfSubArrayTwo < subArrayTwo) {
         mSwapsCount++;
-        if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
-        {
-            // Handle events every few iterations
+        if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward) {
             handleEvents();
-            if (!mIsRunning)
-            {
-                return;
-            }
+            if (!mIsRunning) return;
             draw();
-            SDL_Delay(10);
         }
-        if (leftArray[indexOfSubArrayOne] <= rightArray[indexOfSubArrayTwo])
-        {
+        if (leftArray[indexOfSubArrayOne] <= rightArray[indexOfSubArrayTwo]) {
             mNumbersArray[indexOfMergedArray] = leftArray[indexOfSubArrayOne];
             indexOfSubArrayOne++;
         }
-        else
-        {
+        else {
             mNumbersArray[indexOfMergedArray] = rightArray[indexOfSubArrayTwo];
             indexOfSubArrayTwo++;
         }
         mSwapElement = indexOfMergedArray;
         indexOfMergedArray++;
     }
-    /*
-     * Copy the remaining elements of
-     * left[], if there are any
-     */
-    while (indexOfSubArrayOne < subArrayOne)
-    {
+
+    while (indexOfSubArrayOne < subArrayOne) {
         mNumbersArray[indexOfMergedArray] = leftArray[indexOfSubArrayOne];
         mSwapsCount++;
-        if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
-        {
-            // Handle events every few iterations
+        if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward) {
             handleEvents();
-            if (!mIsRunning)
-            {
-                return;
-            }
+            if (!mIsRunning) return;
             draw();
         }
 
         indexOfSubArrayOne++;
         indexOfMergedArray++;
     }
-    /*
-     * Copy the remaining elements of
-     * right[], if there are any
-     */
+
     while (indexOfSubArrayTwo < subArrayTwo)
     {
         mNumbersArray[indexOfMergedArray] = rightArray[indexOfSubArrayTwo];
@@ -876,19 +744,9 @@ void Visualizer::Engine::merge(int left, int mid, int right)
 void Visualizer::Engine::selectionSort()
 {
     int i, j, min_idx;
-    /*
-     * One by one move boundary of
-     * unsorted subarray
-     */
-    for (i = 0; i < gMAX_ELEMENTS[mCurrentElementsNumber] - 1; i++)
-    {
-        /*
-         * Find the minimum element in
-         * unsorted array
-         */
+    for (i = 0; i < gMAX_ELEMENTS[mCurrentElementsNumber] - 1; i++) {
         min_idx = i;
-        for (j = i + 1; j < gMAX_ELEMENTS[mCurrentElementsNumber]; j++)
-        {
+        for (j = i + 1; j < gMAX_ELEMENTS[mCurrentElementsNumber]; j++) {
 
             mComparisonsCount++;
             if (mNumbersArray[j] < mNumbersArray[min_idx]){
@@ -897,19 +755,14 @@ void Visualizer::Engine::selectionSort()
             }
 
             mCompareElement = j;
-            if (mComparisonsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
-            {
+            if (mComparisonsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward) {
                 handleEvents();
                 if (!mIsRunning) return;
                 draw();
             }
         }
-        /*
-         * Swap the found minimum element
-         * with the first element
-         */
-        if (min_idx != i)
-        {
+
+        if (min_idx != i) {
             std::swap(mNumbersArray[min_idx], mNumbersArray[i]);
             mSwapsCount++;
         }
@@ -919,22 +772,19 @@ void Visualizer::Engine::selectionSort()
 void Visualizer::Engine::insertionSort()
 {
     int i, key, j;
-    for (i = 1; i < gMAX_ELEMENTS[mCurrentElementsNumber]; i++)
-    {
+    for (i = 1; i < gMAX_ELEMENTS[mCurrentElementsNumber]; i++) {
         key = mNumbersArray[i];
         j = i - 1;
         mSwapElement = i;
 
-        while (j >= 0 && mNumbersArray[j] > key)
-        {
+        while (j >= 0 && mNumbersArray[j] > key) {
             mComparisonsCount++;
             mNumbersArray[j + 1] = mNumbersArray[j];
             j = j - 1;
 
             mCompareElement = j;
 
-            if (mComparisonsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
-            {
+            if (mComparisonsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward) {
                 handleEvents();
                 if (!mIsRunning) return;
                 draw();
@@ -975,8 +825,7 @@ void Visualizer::Engine::shuffle()
     // Shuffle the array
     srand(time(NULL));
 
-    for (int i = 0; i < gMAX_ELEMENTS[mCurrentElementsNumber]; i++)
-    {
+    for (int i = 0; i < gMAX_ELEMENTS[mCurrentElementsNumber]; i++) {
         int random = rand() % gMAX_ELEMENTS[mCurrentElementsNumber];
         std::swap(mNumbersArray[i], mNumbersArray[random]);
         // Draw the array every 10% of the way through the shuffle
@@ -1048,8 +897,7 @@ void Visualizer::Engine::draw()
     spacing += mElementNumberTexture->getHeight();
 
     // Update time
-    if(mRequestSort)
-    {
+    if(mRequestSort) {
         auto end = std::chrono::high_resolution_clock::now();
         mElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - mStart).count();
     }
@@ -1094,8 +942,7 @@ void Visualizer::Engine::draw_rects()
     double colorStepB = (endColorB - startColorB) / (double)gMAX_ELEMENTS[mCurrentElementsNumber];
 
     // Draw the rectangles
-    for (int i = 0; i < gMAX_ELEMENTS[mCurrentElementsNumber]; i++)
-    {
+    for (int i = 0; i < gMAX_ELEMENTS[mCurrentElementsNumber]; i++) {
         // Set the color of each rectangle (red if it's the element being swapped)
         if(mCompareElement == i)
             SDL_SetRenderDrawColor(mRenderer, 0x00, 0xFF, 0x00, 0xFF);
