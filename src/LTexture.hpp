@@ -12,6 +12,8 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
+#include "Utilities.hpp"
+
 // Texture wrapper class
 class LTexture
 {
@@ -30,10 +32,7 @@ public:
 #endif
 
     // Creates image from font string
-    bool loadFromRenderedText(std::string textureText, SDL_Color textColor, bool wrappable = false);
-
-    // Creates image from font string
-    bool loadFromRenderedText(std::string textureText, SDL_Color textColor, int width);
+    bool loadFromRenderedText(std::string textureText, SDL_Color textColor, bool wrappable = false, int width = 0, const PADDING padding = {0, 0, 0, 0});
 
     // Deallocates texture
     void free();

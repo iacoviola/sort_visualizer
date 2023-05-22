@@ -48,10 +48,20 @@ const std::string gSORT_NAMES[] = {
     "Gnome Sort"
 };
 
+typedef struct PADDING
+{
+    int top;
+    int right;
+    int bottom;
+    int left;
+} PADDING;
+
 // String used for the info text
 const std::string gINFO_TEXT = " B - bubble sort \n E - shell sort \n Q - quick sort \n H - heap sort \n C - cocktail sort \n M - merge sort \n L - selection sort \n I - insertion sort \n G - gnome sort \n ------- \n Spacebar - start/ff \n S - shuffle \n ESC - quit \n ------- \n";
 // Save the different speeds
 const int gSPEEDS[] = {1, 5, 10, 20, 50, 100};
+
+const int gMAX_ELEMENTS[] = {10, 25, 50, 100, 250, 400, 500, 750, 1000};
 
 const SDL_Color gBackgroundColor = {0x4a, 0x18, 0xa8, 0xFF}; /*! The background color of the window */
 

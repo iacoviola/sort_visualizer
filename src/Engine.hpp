@@ -24,17 +24,15 @@ namespace Visualizer
         /*!
          * @brief Engine constructor
          * @param size The size of the window
-         * @param max_elements The maximum number of elements in the array
          */
-        Engine(const COUPLE size, const int max_elements);
+        Engine(const COUPLE size);
 
         /*!
          * @brief Engine constructor
          * @param size The size of the window
-         * @param max_elements The maximum number of elements in the array
          * @param window_title The title of the window
          */
-        Engine(const COUPLE size, const int max_elements, const char *window_title);
+        Engine(const COUPLE size, const char *window_title);
 
         /*!
          * @brief Engine destructor
@@ -48,22 +46,25 @@ namespace Visualizer
 
     private:
         COUPLE mWindowSize;            /*! The size of the window */
-        const int mMAX_ELEMENTS; /*! The maximum number of elements in the array */
 
         bool mIsRunning = true;       /*! Whether the engine is running or not (esc or closing the app make this false)*/
         bool mRequestSort = false;    /*! Whether the user requested a sort or not (spacebar was pressed)*/
         bool mRequestShuffle = false; /*! Whether the user requested a shuffle or not (s was pressed)*/
         bool mIsSorted = false;       /*! Whether the array is sorted or not (end of sort)*/
         bool mIsFastForward = false;  /*! Whether the sort is fast forwarded or not (f was pressed while sorting)*/
+        bool mHasSpeedChanged = false; /*! Whether the speed has changed or not (up or down arrow was pressed)*/
 
         std::string mWindowTitle = "SDL Sort Visualizer"; /*! The title of the window */
 
         int mSwapsCount = 0;       /*! The number of swaps performed during the sort */
         int mComparisonsCount = 0; /*! The number of comparisons performed during the sort */
 
-        int mCurrentDrawSpeed = 3; /*! The currently selected drawing speed */
+        int mCurrentDrawSpeed = 0; /*! The currently selected drawing speed */
 
         int mSwapElement = -1; /*! The index of the element to be swapped */
+        int mCompareElement = -1; /*! The index of the element to be compared */
+
+        int mCurrentElementsNumber = 3; /*! The currently selected number of elements */
 
         SORT_IDENTIFIER mCurrentSort = BUBBLE_SORT; /*! The currently selected sort algorithm */
 
@@ -76,6 +77,7 @@ namespace Visualizer
         LTexture *mSwapsTexture;       /*! The texture used to draw the swap count text */
         LTexture *mComparisonsTexture; /*! The texture used to draw the comparison count text */
         LTexture *mTimeTexture;        /*! The texture used to draw the time text */
+        LTexture *mElementNumberTexture; /*! The texture used to draw the number of elements text */
 
         TTF_Font *mRobotoSmall; /*! The font used to draw the text */
         TTF_Font *mRobotoLarge; /*! The font used to draw the text */
