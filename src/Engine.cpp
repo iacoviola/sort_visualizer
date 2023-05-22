@@ -415,7 +415,9 @@ void Visualizer::Engine::handleEvents()
                 if (mCurrentDrawSpeed > 0)
                 {
                     // Decreases the speed
+                    mIsFastForward = false;
                     mCurrentDrawSpeed--;
+                    mChoseFastForward = false;
                     std::stringstream ss;
                     ss << " Speed: " << gSPEEDS[mCurrentDrawSpeed] << "x UP/DN";
                     mSpeedTexture->loadFromRenderedText(ss.str(), gFontColor, false, mInfoPanelTexture->getWidth());
@@ -438,6 +440,11 @@ void Visualizer::Engine::handleEvents()
                     {
                         mHasSpeedChanged = true;
                     }
+                } else if(!mRequestSort){
+                    mCurrentDrawSpeed = 6;
+                    mIsFastForward = true;
+                    mChoseFastForward = true;
+                    mSpeedTexture->loadFromRenderedText(" Speed: FF", gFontColor, false, mInfoPanelTexture->getWidth());
                 }
                 break;
             // User presses the J key
@@ -632,36 +639,43 @@ void Visualizer::Engine::quickSort(int low, int high)
 int Visualizer::Engine::partition(int low, int high)
 {
     // Handle events time partition is called
-    handleEvents();
-    if (!mIsRunning)
-    {
-        return -1;
-    }
     int pivot = mNumbersArray[high];
     int i = (low - 1);
 
     for (int j = low; j <= high - 1; j++)
     {
+        mComparisonsCount++;
         if (mNumbersArray[j] < pivot)
         {
             i++;
             std::swap(mNumbersArray[i], mNumbersArray[j]);
+
+            mDrawStart = std::chrono::high_resolution_clock::now();
             mSwapsCount++;
             if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
             {
+                mTimesDrawn++;
                 mSwapElement = j;
                 draw();
             }
+            auto end = std::chrono::high_resolution_clock::now();
+            mDrawsTime += std::chrono::nanoseconds(end - mDrawStart);
         }
     }
     std::swap(mNumbersArray[i + 1], mNumbersArray[high]);
+    mDrawStart = std::chrono::high_resolution_clock::now();
     mSwapsCount++;
     // If fast forward is enabled, draw the array on the screen immediately
-    if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] && !mIsFastForward)
+    if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
     {
+        handleEvents();
+        if (!mIsRunning) return -1;
+        mTimesDrawn++;
         mSwapElement = high;
         draw();
     }
+    auto end = std::chrono::high_resolution_clock::now();
+    mDrawsTime += std::chrono::nanoseconds(end - mDrawStart);
     return (i + 1);
 }
 
@@ -678,24 +692,21 @@ void Visualizer::Engine::bubbleSort()
             {
                 std::swap(mNumbersArray[j], mNumbersArray[j + 1]);
                 swapped = true;
-
-                mDrawStart = std::chrono::high_resolution_clock::now();
-                
                 mSwapsCount++;
-                if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
-                {
-                    // Handle events every few iterations
-                    handleEvents();
-                    if (!mIsRunning)
-                    {
-                        return;
-                    }
-                    mSwapElement = j + 1;
-                    draw();
-                }
-                auto end = std::chrono::high_resolution_clock::now();
-                mDrawsTime += std::chrono::nanoseconds(end - mDrawStart);
+                mSwapElement = j + 1;
             }
+
+            mDrawStart = std::chrono::high_resolution_clock::now();
+                
+            if (mComparisonsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
+            {
+                handleEvents();
+                if (!mIsRunning) return;
+                mTimesDrawn++;
+                draw();
+            }
+            auto end = std::chrono::high_resolution_clock::now();
+            mDrawsTime += std::chrono::nanoseconds(end - mDrawStart);
         }
 
         // If no two elements were swapped in the inner loop, the array is already sorted
@@ -949,17 +960,10 @@ void Visualizer::Engine::merge(int left, int mid, int right)
 
 void Visualizer::Engine::selectionSort()
 {
-    int i, j, min_idx;
-    /*
-     * One by one move boundary of
-     * unsorted subarray
-     */
-    for (i = 0; i < gMAX_ELEMENTS[mCurrentElementsNumber] - 1; i++)
+    int j, min_idx;
+
+    for (int i = 0; i < gMAX_ELEMENTS[mCurrentElementsNumber] - 1; i++)
     {
-        /*
-         * Find the minimum element in
-         * unsorted array
-         */
         min_idx = i;
         for (j = i + 1; j < gMAX_ELEMENTS[mCurrentElementsNumber]; j++)
         {
@@ -968,39 +972,24 @@ void Visualizer::Engine::selectionSort()
             if (mNumbersArray[j] < mNumbersArray[min_idx])
             {
                 min_idx = j;
-                mSwapsCount++;
-                if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
-                {
-                    // Handle events every few iterations
-                    handleEvents();
-                    if (!mIsRunning)
-                    {
-                        return;
-                    }
-                    draw();
-                }
+                mSwapElement = min_idx;
             }
-        }
-        /*
-         * Swap the found minimum element
-         * with the first element
-         */
-        mComparisonsCount++;
-        if (min_idx != i)
-        {
-            std::swap(mNumbersArray[min_idx], mNumbersArray[i]);
-            mSwapsCount++;
-            if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
+
+
+            mDrawStart = std::chrono::high_resolution_clock::now();
+            if (mComparisonsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
             {
-                // Handle events every few iterations
                 handleEvents();
-                if (!mIsRunning)
-                {
-                    return;
-                }
+                if (!mIsRunning) return;
                 draw();
             }
+
+            auto end = std::chrono::high_resolution_clock::now();
+            mDrawsTime += std::chrono::nanoseconds(end - mDrawStart);
         }
+
+        std::swap(mNumbersArray[min_idx], mNumbersArray[i]);
+        mSwapsCount++;
     }
 }
 
@@ -1012,39 +1001,36 @@ void Visualizer::Engine::insertionSort()
         key = mNumbersArray[i];
         j = i - 1;
 
-        /*
-         * Move elements of arr[0..i-1],
-         * that are greater than key, to one
-         * position ahead of their
-         * current position
-         */
         while (j >= 0 && mNumbersArray[j] > key)
         {
             mComparisonsCount++;
             mNumbersArray[j + 1] = mNumbersArray[j];
             j = j - 1;
 
-            mSwapsCount++;
-            if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
+            mDrawStart = std::chrono::high_resolution_clock::now();
+
+            if (mComparisonsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
             {
-                // Handle events every few iterations
                 handleEvents();
-                if (!mIsRunning)
-                {
-                    return;
-                }
+                if (!mIsRunning) return;
                 mSwapElement = j;
                 draw();
             }
+
+            auto end = std::chrono::high_resolution_clock::now();
+            mDrawsTime += std::chrono::nanoseconds(end - mDrawStart);
         }
         mNumbersArray[j + 1] = key;
+        mSwapsCount++;
     }
 }
 
-void Visualizer::Engine::gnomeSort(){
+void Visualizer::Engine::gnomeSort()
+{
     int index = 0;
 
-    while (index < gMAX_ELEMENTS[mCurrentElementsNumber]) {
+    while (index < gMAX_ELEMENTS[mCurrentElementsNumber])
+    {
         mComparisonsCount++;
         if (index == 0)
             index++;
@@ -1054,17 +1040,21 @@ void Visualizer::Engine::gnomeSort(){
             std::swap(mNumbersArray[index], mNumbersArray[index - 1]);
             index--;
             mSwapsCount++;
-            if (mSwapsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
-            {
-                // Handle events every few iterations
-                handleEvents();
-                if (!mIsRunning)
-                {
-                    return;
-                }
-                mSwapElement = index;
-                draw();
-            }
+        }
+
+
+        if (mComparisonsCount % gSPEEDS[mCurrentDrawSpeed] == 0 && !mIsFastForward)
+        {
+            mDrawStart = std::chrono::high_resolution_clock::now();
+            handleEvents();
+            if (!mIsRunning) return;
+            mSwapElement = index;
+            draw();
+
+            mDrawsTime++;
+
+            auto end = std::chrono::high_resolution_clock::now();
+            mDrawsTime += std::chrono::nanoseconds(end - mDrawStart);
         }
     }
 }
@@ -1094,13 +1084,15 @@ void Visualizer::Engine::shuffle()
     // Reset the comparisons count
     mComparisonsCount = 0;
     // The fast forward flag is reset
-    mIsFastForward = false;
+    if(!mChoseFastForward)
+        mIsFastForward = false;
     // Set time to 0
     mElapsed = 0;
     mElapsedNano = std::chrono::nanoseconds(0);
     mDrawsTime = std::chrono::nanoseconds(0);
     // Reset the speed change flag
     mHasSpeedChanged = false;
+    mTimesDrawn = 0;
 }
 
 void Visualizer::Engine::draw()
@@ -1172,6 +1164,7 @@ void Visualizer::Engine::draw()
     spacing += mTimeTexture->getHeight();
 
     time_text.str("");
+    printf("mDrawsTime: %ld mTimesDrawn: %d\n", mDrawsTime.count(), mTimesDrawn);
     time_text << " Real Time: " << std::fixed << std::setprecision(3) << (mElapsedNano - mDrawsTime).count() / 1000000.0 << "ms";
     mTimeTexture->loadFromRenderedText(time_text.str(), gFontColor, false, mInfoPanelTexture->getWidth());
     // Render the time text

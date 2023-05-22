@@ -53,6 +53,7 @@ namespace Visualizer
         bool mIsSorted = false;       /*! Whether the array is sorted or not (end of sort)*/
         bool mIsFastForward = false;  /*! Whether the sort is fast forwarded or not (f was pressed while sorting)*/
         bool mHasSpeedChanged = false; /*! Whether the speed has changed or not (up or down arrow was pressed)*/
+        bool mChoseFastForward = false; /*! Whether the user chose to fast forward or not (f was pressed while not sorting)*/
 
         std::string mWindowTitle = "SDL Sort Visualizer"; /*! The title of the window */
 
@@ -60,6 +61,7 @@ namespace Visualizer
         int mComparisonsCount = 0; /*! The number of comparisons performed during the sort */
 
         int mCurrentDrawSpeed = 3; /*! The currently selected drawing speed */
+        int mTimesDrawn = 0;       /*! The number of times the array has been drawn */
 
         int mSwapElement = -1; /*! The index of the element to be swapped */
 
